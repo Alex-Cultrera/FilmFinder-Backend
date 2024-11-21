@@ -7,6 +7,8 @@ import com.codercultrera.FilmFinder_Backend.dto.AuthResponse;
 import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
 import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,10 +62,10 @@ public class AuthService {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Set-Cookie","token="+token+"; Secure; SameSite:None")
-                .body(new AuthResponse(token, newUser.getId()));
+                .body(new AuthResponse(token, newUser.getUserId()));
     }
 
-    public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(LoginRequest loginRequest, HttpServletResponse response) {
         User foundUser = userService.findByEmail(loginRequest.getEmail());
 
         if (foundUser == null) {
@@ -75,7 +77,13 @@ public class AuthService {
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 String token = jwtUtil.generateToken(loginRequest.getEmail());
-                return ResponseEntity.ok(new AuthResponse(token, foundUser.getId()));
+                Cookie cookie = new Cookie("token" ,token);
+                cookie.setHttpOnly(true);
+                cookie.setMaxAge(3600);
+                cookie.setSecure(true);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+                return ResponseEntity.ok(new AuthResponse(token, foundUser.getUserId()));
             } catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
             }
@@ -83,6 +91,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> authenticateWithGoogle(String code) {
+        return null;
     }
 
     public ResponseEntity<?> authenticateWithFacebook(String code) {

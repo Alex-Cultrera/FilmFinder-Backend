@@ -3,6 +3,7 @@ package com.codercultrera.FilmFinder_Backend.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,10 +15,11 @@ import static io.jsonwebtoken.Jwts.*;
 @Component
 public class JwtUtil {
 
-    // Store securely in environment variables in production
-    private final String secretKey = "your-secret-key";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final long validityDurationInMilliseconds = 3600000; // 1 hour
+    @Value("${jwt.access.token.expiry}")
+    private long tokenExpiry;
 
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
@@ -25,7 +27,7 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + validityDurationInMilliseconds))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiry*1000L))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }

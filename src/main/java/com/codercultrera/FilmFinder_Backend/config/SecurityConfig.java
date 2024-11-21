@@ -1,19 +1,18 @@
 package com.codercultrera.FilmFinder_Backend.config;
 
 import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter;
-import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import com.codercultrera.FilmFinder_Backend.service.CustomUserDetailsService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,41 +24,39 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthFilter jwtAuthFilter;
-    private final JwtUtil jwtUtil;
 
-    public SecurityConfig(UserDetailsService userDetailsService, CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter, JwtUtil jwtUtil) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
-        this.jwtUtil = jwtUtil;
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000/", "http://localhost:3000", "http://localhost:8080/", "http://localhost:8080"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE"));
         configuration.setAllowedHeaders(List.of("Content-Type", "Access-Control-Allow-Headers", "Authorization", "X-Requested-With"));
         configuration.setAllowCredentials(true);
-        return new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, HttpServletRequest httpServletRequest) throws Exception {
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        http
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-                .authorizeHttpRequests((request) -> {
+            .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+            .authorizeHttpRequests((request) -> {
                     request
                         .requestMatchers("/home","/register","/login","/movies/**").permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
@@ -68,17 +65,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**").hasRole("ADMIN")
                         .anyRequest().authenticated();
             })
-            .and()
                 .formLogin()
-                .loginPage("/login")
+//                .loginPage("/login")
                 .permitAll()
                 .defaultSuccessUrl("/home", true)
             .and()
                 .oauth2Login()
-                .loginPage("/login")
+//                .loginPage("/login")
                 .permitAll()
             .and()
-                .logout(httpServletRequest)
+                .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/home")
                 .invalidateHttpSession(true)
@@ -91,11 +87,12 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder())
-                .and()
-                .build();
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        AuthenticationManagerBuilder authManager = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManager.authenticationProvider(authProvider);
+        return authManager.build();
     }
 
     @Bean

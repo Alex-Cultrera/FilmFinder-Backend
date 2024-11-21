@@ -14,11 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-//    @Value("${jwt.access.token.expiry}")
-//    private int accessTokenExpiry;
-//    @Value("${jwt.refresh.token.expiry}")
-//    private int refreshTokenExpiry;
-
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -32,11 +27,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        return authService.authenticateUser(loginRequest);
+        return authService.authenticateUser(loginRequest, response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<String> userLogout(HttpServletRequest request) {
         request.getSession().invalidate();
         SecurityContextHolder.clearContext();
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
