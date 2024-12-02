@@ -1,8 +1,10 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
+import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
 import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
 import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
 import com.codercultrera.FilmFinder_Backend.service.AuthService;
+import com.codercultrera.FilmFinder_Backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,22 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
+    }
+
+    @PostMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestBody RegisterRequest registerRequest) {
+        String email = registerRequest.getEmail();
+        boolean isEmailTaken = userService.existsByEmail(email);
+        if (isEmailTaken) {
+            return new ResponseEntity<>(new ApiResponse("Email is already in use"), HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<>(new ApiResponse("Email is available"), HttpStatus.OK);
+        }
     }
 
     @PostMapping("/register")

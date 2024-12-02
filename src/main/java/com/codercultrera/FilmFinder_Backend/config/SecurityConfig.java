@@ -41,8 +41,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT"));
         configuration.setAllowedHeaders(List.of("Content-Type", "Access-Control-Allow-Headers", "Authorization", "X-Requested-With"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -58,22 +58,22 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .authorizeHttpRequests((request) -> {
                     request
-                        .requestMatchers("/home","/register","/login","/movies/**").permitAll()
+                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/movies/**").permitAll()
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/reviews/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**").hasRole("ADMIN")
                         .anyRequest().authenticated();
             })
-                .formLogin()
+//                .formLogin()
+//                .loginPage("/api/authenticate/login")
+//                .permitAll()
+//                .defaultSuccessUrl("/dashboard", true)
+//            .and()
+//                .oauth2Login()
 //                .loginPage("/login")
-                .permitAll()
-                .defaultSuccessUrl("/home", true)
-            .and()
-                .oauth2Login()
-//                .loginPage("/login")
-                .permitAll()
-            .and()
+//                .permitAll()
+//            .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/home")

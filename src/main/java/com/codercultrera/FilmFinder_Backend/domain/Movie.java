@@ -16,12 +16,10 @@ import java.util.List;
 @Entity
 public class Movie {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long movieId;
+    private Long imdbId;
 
     private String title;
     private int year;
-    private String imdbId;
     private String type;
     private String poster;
     private String rated;
@@ -31,7 +29,7 @@ public class Movie {
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     @JoinTable(name = "movie_actors",
-            joinColumns = @JoinColumn(name = "movie_id"),
+            joinColumns = @JoinColumn(name = "imdb_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
     private List<Actor> actors;
     @OneToMany(mappedBy = "movie")

@@ -3,6 +3,7 @@ package com.codercultrera.FilmFinder_Backend.service;
 import com.codercultrera.FilmFinder_Backend.domain.Role;
 import com.codercultrera.FilmFinder_Backend.domain.RoleType;
 import com.codercultrera.FilmFinder_Backend.domain.User;
+import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
 import com.codercultrera.FilmFinder_Backend.dto.AuthResponse;
 import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
 import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
@@ -43,23 +44,22 @@ public class AuthService {
         String encryptedPassword = new BCryptPasswordEncoder(12).encode(registerRequest.getPassword());
 
         if (userService.existsByEmail(registerRequest.getEmail())) {
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("This email is already associated with an account", true);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            return new ResponseEntity<>(new ApiResponse("Email is already in use"), HttpStatus.BAD_REQUEST);
         }
         User newUser = new User();
         newUser.setFirstName(registerRequest.getFirstName());
         newUser.setLastName(registerRequest.getLastName());
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setUsername(registerRequest.getEmail());
+//        newUser.setUsername(registerRequest.getEmail());
         newUser.setPassword(encryptedPassword);
 
         Role userRole = roleService.findByRoleType(RoleType.valueOf("USER"))
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
         newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
         userService.save(newUser);
-        String token = jwtUtil.generateToken(newUser.getUsername());
+        String token = jwtUtil.generateToken(newUser.getEmail());
 
+        System.out.println(token);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Set-Cookie","token="+token+"; Secure; SameSite:None")
                 .body(new AuthResponse(token, newUser.getUserId()));
