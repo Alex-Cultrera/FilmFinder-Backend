@@ -20,4 +20,11 @@ public class RoleService {
         return roleRepo.findByRoleType(roleType);
     }
 
+    public void save (Role role) {
+        roleRepo.save(role);
+    }
+
+    public boolean existsByRoleType(RoleType roleType) {
+        return roleRepo.existsByRoleType(roleType);
+    }
 }

@@ -1,8 +1,7 @@
 package com.codercultrera.FilmFinder_Backend.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.codercultrera.FilmFinder_Backend.domain.User;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,19 +20,45 @@ public class JwtUtil {
     @Value("${jwt.access.token.expiry}")
     private long tokenExpiry;
 
-    public String generateToken(String email) {
-        Map<String, Object> claims = new HashMap<>();
+    private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
+    private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
+
+    public String generateAccessToken(User user) {
         return builder()
-                .setClaims(claims)
-                .setSubject(email)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiry*1000L))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidity))
+                .claim("userId", user.getUserId())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
+    public String generateRefreshToken(User user) {
+        return builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidity))
+                .claim("userId", user.getUserId())
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token expired: " + e.getMessage());
+        } catch (JwtException e) {
+            System.out.println("Invalid token: " + e.getMessage());
+        }
+        return false;
+    }
+
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
+        return parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
@@ -44,15 +69,8 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaims(token).getExpiration();
-    }
-
     public boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
     }
 
-    public boolean validateToken(String token, String username) {
-        return (username.equals(extractUsername(token)) && !isTokenExpired(token));
-    }
 }

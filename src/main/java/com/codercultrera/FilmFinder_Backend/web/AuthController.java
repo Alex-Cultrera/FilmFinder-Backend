@@ -1,27 +1,36 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
+import com.codercultrera.FilmFinder_Backend.domain.User;
 import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
 import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
 import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
+import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import com.codercultrera.FilmFinder_Backend.service.AuthService;
 import com.codercultrera.FilmFinder_Backend.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.web.util.WebUtils.getCookie;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService authService, UserService userService) {
+    public AuthController(AuthService authService, UserService userService, JwtUtil jwtUtil) {
         this.authService = authService;
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/check-email")
@@ -50,6 +59,11 @@ public class AuthController {
         request.getSession().invalidate();
         SecurityContextHolder.clearContext();
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        return authService.refreshTokens(request, response);
     }
 
     @GetMapping("/google")
