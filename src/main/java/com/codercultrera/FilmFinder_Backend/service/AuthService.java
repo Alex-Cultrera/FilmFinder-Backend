@@ -22,11 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
-import static com.codercultrera.FilmFinder_Backend.domain.RoleType.USER;
 import static org.springframework.web.util.WebUtils.getCookie;
 
 @Service
@@ -76,7 +73,7 @@ public class AuthService {
 
             User user = userService.findByEmail(loginRequest.getEmail());
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
             }
 
             String accessToken = jwtUtil.generateAccessToken(user);
@@ -88,13 +85,14 @@ public class AuthService {
             cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
             cookie.setPath("/");
             response.addCookie(cookie);
-            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId()));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Set-Cookie","token="+refreshToken+"; Secure; SameSite:None")
+                    .body(new AuthResponse(accessToken, user.getUserId()));
+//            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId()));
         } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
         }
-//            return ResponseEntity.status(HttpStatus.OK)
-//                    .header("Set-Cookie","token="+token+"; Secure; SameSite:None")
-//                    .body(new AuthResponse(token, foundUser.getUserId()));
+
     }
 
 
