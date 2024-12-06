@@ -85,10 +85,10 @@ public class AuthService {
             cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
             cookie.setPath("/");
             response.addCookie(cookie);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header("Set-Cookie","token="+refreshToken+"; Secure; SameSite:None")
-                    .body(new AuthResponse(accessToken, user.getUserId()));
-//            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId()));
+//            return ResponseEntity.status(HttpStatus.OK)
+//                    .header("Set-Cookie","token="+refreshToken+"; Secure; SameSite:None")
+//                    .body(new AuthResponse(accessToken, user.getUserId()));
+            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId()));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
         }

@@ -3,13 +3,10 @@ package com.codercultrera.FilmFinder_Backend.security;
 import com.codercultrera.FilmFinder_Backend.domain.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static io.jsonwebtoken.Jwts.*;
 
@@ -25,8 +22,8 @@ public class JwtUtil {
         this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    @Value("${jwt.access.token.expiry}")
-    private long tokenExpiry;
+//    @Value("${jwt.access.token.expiry}")
+//    private long tokenExpiry;
 
     private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
     private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
