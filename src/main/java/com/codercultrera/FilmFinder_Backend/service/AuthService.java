@@ -11,6 +11,7 @@ import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 
 import static org.springframework.web.util.WebUtils.getCookie;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -87,8 +89,8 @@ public class AuthService {
             response.addCookie(cookie);
 //            return ResponseEntity.status(HttpStatus.OK)
 //                    .header("Set-Cookie","token="+refreshToken+"; Secure; SameSite:None")
-//                    .body(new AuthResponse(accessToken, user.getUserId()));
-            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId()));
+//                    .body(new AuthResponse(accessToken, user.getUserId(), user.getFirstName()));
+            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId(), user.getFirstName()));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
         }
@@ -125,6 +127,6 @@ public class AuthService {
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
 
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUserId()));
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUserId(), user.getFirstName()));
     }
 }

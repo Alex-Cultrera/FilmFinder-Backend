@@ -1,25 +1,35 @@
 package com.codercultrera.FilmFinder_Backend.security;
 
+import com.codercultrera.FilmFinder_Backend.domain.Role;
 import com.codercultrera.FilmFinder_Backend.domain.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.jsonwebtoken.Jwts.*;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
-//    @Value("${jwt.secret}")
-//    private String secretKey;
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final SecretKey secretKey;
+    private final SecretKey secretKeyForSigning;
 
-    public JwtUtil() {
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+        if (secretKey.length() < 32) {
+            throw new IllegalArgumentException("The secret key should be at least 256 bits (32 bytes) long");
+        }
+        this.secretKeyForSigning = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
 //    @Value("${jwt.access.token.expiry}")
@@ -34,7 +44,8 @@ public class JwtUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidity))
                 .claim("userId", user.getUserId())
-                .signWith(secretKey)
+                .claim("roles", user.getRoles().stream().map(Role::getRoleType).collect(Collectors.toList()))
+                .signWith(secretKeyForSigning, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -44,14 +55,15 @@ public class JwtUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidity))
                 .claim("userId", user.getUserId())
-                .signWith(secretKey)
+                .claim("roles", user.getRoles().stream().map(Role::getRoleType).collect(Collectors.toList()))
+                .signWith(secretKeyForSigning, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(secretKeyForSigning)
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
@@ -64,7 +76,7 @@ public class JwtUtil {
 
     public Claims extractClaims(String token) {
         return parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(secretKeyForSigning)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -72,6 +84,11 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractClaims(token).getSubject();
+    }
+
+    public Set<String> extractRoles(String token) {
+        Claims claims = extractClaims(token);
+        return new HashSet<>(claims.get("roles", Set.class));
     }
 
     public boolean isTokenExpired(String token) {

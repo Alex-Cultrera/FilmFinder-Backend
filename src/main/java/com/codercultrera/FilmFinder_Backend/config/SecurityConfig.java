@@ -2,6 +2,7 @@ package com.codercultrera.FilmFinder_Backend.config;
 
 import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter;
 import com.codercultrera.FilmFinder_Backend.service.CustomUserDetailsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -39,10 +41,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Access-Control-Allow-Headers", "Authorization", "X-Requested-With"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // will need to add domains in future
         configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -50,19 +52,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .authorizeHttpRequests((request) -> {
                     request
                         .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register","/movies/**").permitAll()
-                        .requestMatchers("/dashboard/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/dashboard/**", "/api/auth/name").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**").hasRole("ADMIN")
                         .anyRequest().authenticated();
             })
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 //                .formLogin()
 //                .loginPage("/api/authenticate/login")
 //                .permitAll()
