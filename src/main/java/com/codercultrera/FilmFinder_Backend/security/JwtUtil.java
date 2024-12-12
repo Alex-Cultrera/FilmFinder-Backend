@@ -67,9 +67,9 @@ public class JwtUtil {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Token expired: " + e.getMessage());
+            log.error("Token expired: {}", e.getMessage());
         } catch (JwtException e) {
-            System.out.println("Invalid token: " + e.getMessage());
+            log.error("Invalid token: {}", e.getMessage());
         }
         return false;
     }

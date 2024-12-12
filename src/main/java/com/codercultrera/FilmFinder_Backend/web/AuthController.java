@@ -1,10 +1,8 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
-import com.codercultrera.FilmFinder_Backend.domain.User;
 import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
 import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
 import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
-import com.codercultrera.FilmFinder_Backend.dto.UserInformation;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import com.codercultrera.FilmFinder_Backend.service.AuthService;
 import com.codercultrera.FilmFinder_Backend.service.UserService;
@@ -63,13 +61,6 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         return authService.refreshTokens(request, response);
-    }
-
-    @PostMapping("/name")
-    public String getFirstName(@RequestBody UserInformation userInfo) {
-        System.out.println(userInfo.getEmail());
-        User user = userService.findByEmail(userInfo.getEmail());
-        return user.getFirstName();
     }
 
     @GetMapping("/google")
