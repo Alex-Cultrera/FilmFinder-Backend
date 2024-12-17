@@ -32,9 +32,6 @@ public class JwtUtil {
         this.secretKeyForSigning = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-//    @Value("${jwt.access.token.expiry}")
-//    private long tokenExpiry;
-
     private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
     private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
 

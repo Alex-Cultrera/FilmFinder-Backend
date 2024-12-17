@@ -28,6 +28,8 @@ public class User implements UserDetails {
     private String email;
     @Setter
     private String username;
+    @Getter@Setter
+    private String photo;
     @Setter
     private String password;
     @Getter@Setter

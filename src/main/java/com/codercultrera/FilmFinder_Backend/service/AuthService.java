@@ -3,10 +3,7 @@ package com.codercultrera.FilmFinder_Backend.service;
 import com.codercultrera.FilmFinder_Backend.domain.Role;
 import com.codercultrera.FilmFinder_Backend.domain.RoleType;
 import com.codercultrera.FilmFinder_Backend.domain.User;
-import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
-import com.codercultrera.FilmFinder_Backend.dto.AuthResponse;
-import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
-import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
+import com.codercultrera.FilmFinder_Backend.dto.*;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -87,9 +84,6 @@ public class AuthService {
             cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
             cookie.setPath("/");
             response.addCookie(cookie);
-//            return ResponseEntity.status(HttpStatus.OK)
-//                    .header("Set-Cookie","token="+refreshToken+"; Secure; SameSite:None")
-//                    .body(new AuthResponse(accessToken, user.getUserId(), user.getFirstName()));
             return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId(), user.getFirstName()));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
@@ -97,15 +91,55 @@ public class AuthService {
 
     }
 
+    public ResponseEntity<?> continueWithGoogle(GoogleApiRequest googleApiRequest, HttpServletResponse response) {
+        if (userService.existsByEmail(googleApiRequest.getUserEmail())) {
+            try {
+                User existingUser = userService.findByEmail(googleApiRequest.getUserEmail());
 
+                String accessToken = jwtUtil.generateAccessToken(existingUser);
+                String refreshToken = jwtUtil.generateRefreshToken(existingUser);
 
+                Cookie cookie = new Cookie("refresh_token", refreshToken);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
+                cookie.setPath("/");
+                response.addCookie(cookie);
 
-    public ResponseEntity<?> authenticateWithGoogle(String code) {
-        return null;
-    }
+                return ResponseEntity.ok(new AuthResponse(accessToken, existingUser.getUserId(), existingUser.getFirstName()));
+                }
+            catch (BadCredentialsException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
+            }
+        } else {
+            try {
 
-    public ResponseEntity<?> authenticateWithFacebook(String code) {
-        return null;
+                User newUser = new User();
+                newUser.setFirstName(googleApiRequest.getFirstName());
+                newUser.setLastName(googleApiRequest.getLastName());
+                newUser.setEmail(googleApiRequest.getUserEmail());
+                newUser.setPhoto(googleApiRequest.getUserPhoto());
+
+                Role userRole = roleService.findByRoleType(RoleType.valueOf("USER"))
+                        .orElseThrow(() -> new RuntimeException("Error: Role not found."));
+                newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
+                userService.save(newUser);
+
+                String accessToken = jwtUtil.generateAccessToken(newUser);
+                String refreshToken = jwtUtil.generateRefreshToken(newUser);
+
+                Cookie cookie = new Cookie("refresh_token", refreshToken);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
+                cookie.setPath("/");
+                response.addCookie(cookie);
+
+                return ResponseEntity.ok(new AuthResponse(accessToken, newUser.getUserId(), newUser.getFirstName()));
+            } catch (BadCredentialsException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
+            }
+        }
     }
 
     public ResponseEntity<?> refreshTokens(HttpServletRequest request, HttpServletResponse response) {
@@ -129,4 +163,10 @@ public class AuthService {
 
         return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUserId(), user.getFirstName()));
     }
+
+    public ResponseEntity<?> continueWithFacebook(String code) {
+        return null;
+    }
+
+
 }

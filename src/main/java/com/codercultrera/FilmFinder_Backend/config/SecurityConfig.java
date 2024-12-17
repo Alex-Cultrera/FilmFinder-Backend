@@ -41,7 +41,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // will need to add domains in future
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
@@ -58,25 +58,16 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .authorizeHttpRequests((request) -> {
                     request
-                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register","/movies/**").permitAll()
-                        .requestMatchers("/dashboard/**", "/api/auth/name").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register","/movies/**", "/api/auth/google").permitAll()
+                        .requestMatchers("/dashboard/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**", "/api/auth/name","/api/auth/name/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/reviews/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**").hasRole("ADMIN")
                         .anyRequest().authenticated();
             })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//                .formLogin()
-//                .loginPage("/api/authenticate/login")
-//                .permitAll()
-//                .defaultSuccessUrl("/dashboard", true)
-//            .and()
-//                .oauth2Login()
-//                .loginPage("/login")
-//                .permitAll()
-//            .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/home")

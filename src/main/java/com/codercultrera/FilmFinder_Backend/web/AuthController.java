@@ -1,8 +1,6 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
-import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
-import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
-import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
+import com.codercultrera.FilmFinder_Backend.dto.*;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import com.codercultrera.FilmFinder_Backend.service.AuthService;
 import com.codercultrera.FilmFinder_Backend.service.UserService;
@@ -14,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -22,12 +19,10 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService authService, UserService userService, JwtUtil jwtUtil) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/check-email")
@@ -46,6 +41,11 @@ public class AuthController {
         return authService.registerUser(registerRequest);
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<?> register(@RequestBody GoogleApiRequest googleApiRequest, HttpServletResponse response) {
+        return authService.continueWithGoogle(googleApiRequest, response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         return authService.authenticateUser(loginRequest, response);
@@ -62,15 +62,4 @@ public class AuthController {
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         return authService.refreshTokens(request, response);
     }
-
-    @GetMapping("/google")
-    public ResponseEntity<?> authenticateWithGoogle(@RequestParam("code") String code) {
-        return authService.authenticateWithGoogle(code);
-    }
-
-    @GetMapping("/facebook")
-    public ResponseEntity<?> authenticateWithFacebook(@RequestParam("code") String code) {
-        return authService.authenticateWithFacebook(code);
-    }
-
 }

@@ -7,10 +7,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ApiResponse {
+@AllArgsConstructor
+public class GoogleApiRequest {
 
-    private String message;
+    private String firstName;
+    private String lastName;
+    private String userEmail;
+    private String userPhoto;
 
 }
