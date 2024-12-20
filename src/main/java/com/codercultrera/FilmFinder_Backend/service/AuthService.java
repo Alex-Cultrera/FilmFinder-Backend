@@ -18,9 +18,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.web.util.WebUtils.getCookie;
 
@@ -168,5 +175,37 @@ public class AuthService {
         return null;
     }
 
+    public ResponseEntity<?> uploadProfilePhoto(MultipartFile file) {
+        try {
+            // Generate a unique filename for the uploaded file
+            String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+            Path path = Paths.get(profilePhotosDirectory + "/" + fileName);
+
+            // Save the file to the server
+            Files.copy(file.getInputStream(), path);
+
+            // Construct the URL of the uploaded image
+            String photoUrl = "/images/profiles/" + fileName; // Adjust the path as needed
+
+            // Update the user profile (assume userService.updateProfilePhoto() is implemented)
+            String userId = "some-logged-in-user-id"; // Get this from the current session or authentication context
+            userService.updateProfilePhoto(userId, photoUrl);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new ProfilePhotoResponse(photoUrl));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file");
+        }
+    }
+
+    public ResponseEntity<?> getPhoto(String userId) {
+        Optional<User> user = userService.findById(userId);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(new ProfilePhotoResponse(user.get().getPhoto()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
 
 }
