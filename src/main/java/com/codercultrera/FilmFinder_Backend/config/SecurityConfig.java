@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -43,7 +44,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -58,13 +59,13 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .authorizeHttpRequests((request) -> {
                     request
-                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register","/movies/**", "/api/auth/google").permitAll()
-                        .requestMatchers("/dashboard/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register", "/api/auth/google").permitAll()
+                        .requestMatchers("/dashboard/**", "/settings", "/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/reviews/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/reviews/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**", "/api/auth/uploadProfilePhoto").hasRole("ADMIN")
                         .anyRequest().authenticated();
             })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

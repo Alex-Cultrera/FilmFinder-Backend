@@ -58,6 +58,21 @@ public class AuthController {
         return authService.authenticateUser(loginRequest, response);
     }
 
+    @PostMapping("/hello")
+    public ResponseEntity<?> getHello(@RequestParam ("email") String email) {
+        try {
+            boolean foundUser = userService.existsByEmail(email);
+            if (foundUser) {
+                return ResponseEntity.status(HttpStatus.OK).body("Hello");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file.");
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<String> userLogout(HttpServletRequest request) {
         request.getSession().invalidate();
@@ -70,13 +85,32 @@ public class AuthController {
         return authService.refreshTokens(request, response);
     }
 
-    @PostMapping("/postProfilePhoto")
-    public ResponseEntity<?> postProfilePhoto(@RequestParam("file") MultipartFile file) {
-        return authService.uploadProfilePhoto(file);
+    @PostMapping("/uploadProfilePhoto")
+//    public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile file) {
+        try {
+            Long myId = Long.parseLong(userId);
+            if (file.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No file uploaded.");
+            }
+            if (myId > 5) {
+                return ResponseEntity.status(HttpStatus.OK).body("Profile photo uploaded successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file.");
+        }
     }
 
-    @GetMapping("/{userId}/profilePhoto")
-    public ResponseEntity<?> getProfilePhoto(@PathVariable String userId) {
-        return authService.getPhoto(userId);
+    @GetMapping("/profilePhoto/{userId}")
+    public ResponseEntity<byte[]> getProfilePhoto(@PathVariable Long userId) {
+        byte[] profilePhoto = userService.getProfilePhoto(userId);
+        if (profilePhoto != null) {
+            return ResponseEntity.ok().body(profilePhoto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }

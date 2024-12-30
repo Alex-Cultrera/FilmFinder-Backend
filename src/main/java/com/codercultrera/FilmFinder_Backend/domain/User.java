@@ -30,6 +30,9 @@ public class User implements UserDetails {
     private String username;
     @Getter@Setter
     private String photo;
+    @Getter@Setter
+    @Lob
+    private byte[] profilePhoto;
     @Setter
     private String password;
     @Getter@Setter
