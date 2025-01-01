@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -44,7 +45,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "*"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -57,17 +58,17 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-            .authorizeHttpRequests((request) -> {
+                .authorizeHttpRequests((request) -> {
                     request
-                        .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register", "/api/auth/google").permitAll()
-                        .requestMatchers("/dashboard/**", "/settings", "/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.OPTIONS,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**", "/api/auth/uploadProfilePhoto").hasRole("ADMIN")
-                        .anyRequest().authenticated();
-            })
+                            .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register", "/api/auth/google").permitAll()
+                            .requestMatchers("/dashboard/**", "/settings", "/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/admin/**").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.POST,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.OPTIONS,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**", "/api/auth/uploadProfilePhoto").hasRole("ADMIN")
+                            .anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout()
                 .logoutUrl("/logout")
