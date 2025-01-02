@@ -59,9 +59,9 @@ public class AuthController {
     }
 
     @PostMapping("/hello")
-    public ResponseEntity<?> getHello(@RequestParam ("email") String email) {
+    public ResponseEntity<?> getHello(@RequestBody HelloRequest helloRequest) {
         try {
-            boolean foundUser = userService.existsByEmail(email);
+            boolean foundUser = userService.existsByEmail(helloRequest.getEmail());
             if (foundUser) {
                 return ResponseEntity.status(HttpStatus.OK).body("Hello");
             } else {
