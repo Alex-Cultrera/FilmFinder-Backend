@@ -43,7 +43,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3000/", "https://codercultrera-filmfinder.netlify.app"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
@@ -60,13 +60,51 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests((request) -> {
                     request
-                            .requestMatchers("/home","/register","/login", "/api/auth/check-email","/api/auth/login", "/api/auth/register", "/api/auth/google").permitAll()
-                            .requestMatchers("/dashboard/**", "/settings", "/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                            .requestMatchers("/admin/**").hasRole("ADMIN")
-                            .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                            .requestMatchers(HttpMethod.GET,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto").hasAnyRole("USER", "ADMIN")
-                            .requestMatchers(HttpMethod.POST,"/reviews/**", "/settings/**","/api/auth/uploadProfilePhoto", "/api/auth/hello").authenticated()
-                            .requestMatchers(HttpMethod.DELETE, "/users/**", "/reviews/**", "/api/auth/uploadProfilePhoto").hasRole("ADMIN")
+                            .requestMatchers(
+//                                    "/register",
+//                                    "/login",
+                                    "/api/auth/check-email",
+                                    "/api/auth/login",
+                                    "/api/auth/register",
+                                    "/api/auth/google")
+                            .permitAll()
+
+                            .requestMatchers(
+                                    HttpMethod.OPTIONS)
+                            .permitAll()
+
+                            .requestMatchers(
+//                                    "/dashboard/**",
+                                    "/settings")
+                            .hasAnyRole("USER", "ADMIN")
+
+                            .requestMatchers(
+                                    "/admin/**")
+                            .hasRole("ADMIN")
+
+                            .requestMatchers(
+                                    HttpMethod.GET,
+                                    "/favorites",
+                                    "/reviews/**",
+                                    "/settings/**",
+                                    "/api/auth/uploadProfilePhoto")
+                            .hasAnyRole("USER", "ADMIN")
+
+                            .requestMatchers(
+                                    HttpMethod.POST,
+                                    "/reviews/**",
+                                    "/settings/**",
+                                    "/api/auth/uploadProfilePhoto",
+                                    "/api/auth/hello")
+                            .hasAnyRole("USER", "ADMIN")
+
+                            .requestMatchers(
+                                    HttpMethod.DELETE,
+                                    "/users/**",
+                                    "/reviews/**",
+                                    "/api/auth/uploadProfilePhoto")
+                            .hasRole("ADMIN")
+
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

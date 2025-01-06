@@ -13,11 +13,11 @@ public class DataSeedingConfig {
     @Bean
     public CommandLineRunner seedRoles(RoleService roleService) {
         return args -> {
-            if (!roleService.existsByRoleType(RoleType.USER)) {
-                roleService.save(new Role(RoleType.valueOf("USER")));
+            if (!roleService.existsByRoleType(RoleType.ROLE_USER)) {
+                roleService.save(new Role(RoleType.valueOf("ROLE_USER")));
             }
-            if (!roleService.existsByRoleType(RoleType.valueOf("ADMIN"))) {
-                roleService.save(new Role(RoleType.ADMIN));
+            if (!roleService.existsByRoleType(RoleType.valueOf("ROLE_ADMIN"))) {
+                roleService.save(new Role(RoleType.ROLE_ADMIN));
             }
         };
     }
