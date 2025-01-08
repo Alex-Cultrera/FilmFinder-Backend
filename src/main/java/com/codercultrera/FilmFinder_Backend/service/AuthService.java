@@ -1,8 +1,6 @@
 package com.codercultrera.FilmFinder_Backend.service;
 
-import com.codercultrera.FilmFinder_Backend.domain.Role;
-import com.codercultrera.FilmFinder_Backend.domain.RoleType;
-import com.codercultrera.FilmFinder_Backend.domain.User;
+import com.codercultrera.FilmFinder_Backend.domain.*;
 import com.codercultrera.FilmFinder_Backend.dto.*;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -18,16 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.springframework.web.util.WebUtils.getCookie;
 
@@ -172,9 +162,35 @@ public class AuthService {
         return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUserId(), user.getFirstName()));
     }
 
+    public ResponseEntity<List<Movie>> favoriteMovies(HttpServletRequest request) {
+        User user = jwtUtil.getUserFromToken(request);
+        List<Movie> favorites = userService.getFavoriteMovies(user);
+        return ResponseEntity.ok(favorites);
+    }
+
+    public ResponseEntity<String> favoriteMoviesAdd(FavoriteRequest addedMovie, HttpServletRequest request) {
+        User user = jwtUtil.getUserFromToken(request);
+        try {
+            userService.addMovieToFavorites(user, addedMovie);
+            return ResponseEntity.ok("Movie added to favorites.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error adding movie to favorites.");
+        }
+    }
+
+    public ResponseEntity<String> favoriteMoviesRemove(String imdbId, HttpServletRequest request) {
+        User user = jwtUtil.getUserFromToken(request);
+        userService.removeMovieFromFavorites(user, imdbId);
+        return ResponseEntity.ok("Movie removed from favorites.");
+    }
+
+
+
     public ResponseEntity<?> continueWithFacebook(String code) {
         return null;
     }
+
+
 
 //    public ResponseEntity<?> uploadProfilePhoto(MultipartFile file) {
 //        try {

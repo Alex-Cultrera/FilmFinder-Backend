@@ -16,24 +16,41 @@ import java.util.List;
 @Entity
 public class Movie {
     @Id
-    private Long imdbId;
-
+    private String imdbId;
     private String title;
-    private int year;
+    private String year;
     private String type;
     private String poster;
+
+    @ManyToMany(mappedBy = "favoriteMovies")
+    private List<User> usersWhoFavorited = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "reviewedMovies")
+    private List<User> usersWhoReviewed = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "watchedMovies")
+    private List<User> usersWhoWatched = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "queuedMovies")
+    private List<User> usersWhoQueued = new ArrayList<>();
+
     private String rated;
     private String runtime;
     private String plot;
     private String releaseDate;
+
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     @JoinTable(name = "movie_actors",
             joinColumns = @JoinColumn(name = "imdb_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id"))
     private List<Actor> actors;
+
     @OneToMany(mappedBy = "movie")
     private List<Review> reviews = new ArrayList<>();
+
+
+
 
 
 }

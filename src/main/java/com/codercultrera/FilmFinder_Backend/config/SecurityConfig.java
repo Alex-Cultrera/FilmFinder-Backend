@@ -61,8 +61,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests((request) -> {
                     request
                             .requestMatchers(
-//                                    "/register",
-//                                    "/login",
                                     "/api/auth/check-email",
                                     "/api/auth/login",
                                     "/api/auth/register",
@@ -74,34 +72,25 @@ public class SecurityConfig {
                             .permitAll()
 
                             .requestMatchers(
-//                                    "/dashboard/**",
-                                    "/settings")
-                            .hasAnyRole("USER", "ADMIN")
-
-                            .requestMatchers(
                                     "/admin/**")
                             .hasRole("ADMIN")
 
                             .requestMatchers(
                                     HttpMethod.GET,
-                                    "/favorites",
-                                    "/reviews/**",
-                                    "/settings/**",
+                                    "/api/auth/favorites",
                                     "/api/auth/uploadProfilePhoto")
                             .hasAnyRole("USER", "ADMIN")
 
                             .requestMatchers(
                                     HttpMethod.POST,
-                                    "/reviews/**",
-                                    "/settings/**",
+                                    "/api/auth/addFavorite",
+                                    "/api/auth/removeFavorite",
                                     "/api/auth/uploadProfilePhoto",
                                     "/api/auth/hello")
                             .hasAnyRole("USER", "ADMIN")
 
                             .requestMatchers(
                                     HttpMethod.DELETE,
-                                    "/users/**",
-                                    "/reviews/**",
                                     "/api/auth/uploadProfilePhoto")
                             .hasRole("ADMIN")
 

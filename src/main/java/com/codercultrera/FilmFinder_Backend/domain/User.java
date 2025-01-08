@@ -44,37 +44,42 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @Getter@Setter
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    @JoinTable(name = "user_favorite_movies",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+    private List<Movie> favoriteMovies = new ArrayList<>();
+
+    @Getter@Setter
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    @JoinTable(name = "user_reviewed_movies",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+    private List<Movie> reviewedMovies = new ArrayList<>();
+
+    @Getter@Setter
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    @JoinTable(name = "user_watched_movies",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+    private List<Movie> watchedMovies = new ArrayList<>();
+
+    @Getter@Setter
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    @JoinTable(name = "user_queued_movies",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+    private List<Movie> queuedMovies = new ArrayList<>();
+
     @Getter@Setter
     @OneToMany(mappedBy = "reviewer")
     private List<Review> reviews = new ArrayList<>();
-    @Getter@Setter
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    @JoinTable(name = "user_movies_reviewed",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id"))
-    private List<ReviewedMovie> moviesReviewed = new ArrayList<>();
-    @Getter@Setter
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    @JoinTable(name = "user_movies_watched",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id"))
-    private List<WatchedMovie> moviesWatched = new ArrayList<>();
-    @Getter@Setter
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    @JoinTable(name = "user_movies_favorited",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id"))
-    private List<FavoritedMovie> moviesFavorited = new ArrayList<>();
-    @Getter@Setter
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    @JoinTable(name = "user_movies_queued",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id"))
-    private List<QueuedMovie> moviesQueued = new ArrayList<>();
 
 
 

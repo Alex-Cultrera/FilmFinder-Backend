@@ -2,10 +2,14 @@ package com.codercultrera.FilmFinder_Backend.security;
 
 import com.codercultrera.FilmFinder_Backend.domain.Role;
 import com.codercultrera.FilmFinder_Backend.domain.User;
+import com.codercultrera.FilmFinder_Backend.service.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -21,16 +25,18 @@ import static io.jsonwebtoken.Jwts.*;
 @Component
 public class JwtUtil {
 
+    private final UserService userService;
     @Value("${jwt.secret}")
     private String secretKey;
 
     private final SecretKey secretKeyForSigning;
 
-    public JwtUtil(@Value("${jwt.secret}") String secretKey) {
+    public JwtUtil(@Value("${jwt.secret}") String secretKey, UserService userService) {
         if (secretKey.length() < 32) {
             throw new IllegalArgumentException("The secret key should be at least 256 bits (32 bytes) long");
         }
         this.secretKeyForSigning = Keys.hmacShaKeyFor(secretKey.getBytes());
+        this.userService = userService;
     }
 
     private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
@@ -56,6 +62,19 @@ public class JwtUtil {
                 .claim("roles", user.getRoles().stream().map(Role::getRoleType).collect(Collectors.toList()))
                 .signWith(secretKeyForSigning, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public User getUserFromToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        if (validateToken(token)) {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return userService.findByEmail(claims.getSubject());
+        } else {
+            return null;
+        }
     }
 
     public boolean validateToken(String token) {

@@ -1,8 +1,7 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
-import com.codercultrera.FilmFinder_Backend.domain.User;
+import com.codercultrera.FilmFinder_Backend.domain.Movie;
 import com.codercultrera.FilmFinder_Backend.dto.*;
-import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 import com.codercultrera.FilmFinder_Backend.service.AuthService;
 import com.codercultrera.FilmFinder_Backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -58,21 +54,6 @@ public class AuthController {
         return authService.authenticateUser(loginRequest, response);
     }
 
-    @PostMapping("/hello")
-    public ResponseEntity<?> getHello(@RequestBody HelloRequest helloRequest) {
-        try {
-            boolean foundUser = userService.existsByEmail(helloRequest.getEmail());
-            if (foundUser) {
-                return ResponseEntity.status(HttpStatus.OK).body("Hello");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file.");
-        }
-    }
-
     @PostMapping("/logout")
     public ResponseEntity<String> userLogout(HttpServletRequest request) {
         request.getSession().invalidate();
@@ -83,6 +64,21 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         return authService.refreshTokens(request, response);
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<?> getFavoriteMovies(HttpServletRequest request) {
+        return authService.favoriteMovies(request);
+    }
+
+    @PostMapping("/addFavorite")
+    public ResponseEntity<String> addFavoriteMovie(@RequestBody FavoriteRequest addedMovie, HttpServletRequest request) {
+        return authService.favoriteMoviesAdd(addedMovie, request);
+    }
+
+    @PostMapping("/removeFavorite")
+    public ResponseEntity<String> removeFavoriteMovie(@RequestBody String imdbId, HttpServletRequest request) {
+        return authService.favoriteMoviesRemove(imdbId, request);
     }
 
     @PostMapping("/uploadProfilePhoto")
@@ -111,6 +107,21 @@ public class AuthController {
             return ResponseEntity.ok().body(profilePhoto);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/hello")
+    public ResponseEntity<?> getHello(@RequestBody HelloRequest helloRequest) {
+        try {
+            boolean foundUser = userService.existsByEmail(helloRequest.getEmail());
+            if (foundUser) {
+                return ResponseEntity.status(HttpStatus.OK).body("Hello");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file.");
         }
     }
 }
