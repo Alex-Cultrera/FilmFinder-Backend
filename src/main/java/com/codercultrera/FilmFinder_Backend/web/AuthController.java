@@ -82,7 +82,6 @@ public class AuthController {
     }
 
     @PostMapping("/uploadProfilePhoto")
-//    public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile file) {
     public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile file) {
         try {
             Long myId = Long.parseLong(userId);

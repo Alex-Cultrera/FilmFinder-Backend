@@ -2,7 +2,9 @@ package com.codercultrera.FilmFinder_Backend.service;
 
 import com.codercultrera.FilmFinder_Backend.domain.*;
 import com.codercultrera.FilmFinder_Backend.dto.*;
+import com.codercultrera.FilmFinder_Backend.security.CookieUtils;
 import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,7 +15,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +33,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final RoleService roleService;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthService(JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserService userService, RoleService roleService) {
+    public AuthService(JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserService userService, RoleService roleService, CustomUserDetailsService customUserDetailsService) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.roleService = roleService;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest) {
@@ -75,18 +81,17 @@ public class AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
-            Cookie cookie = new Cookie("refresh_token", refreshToken);
-            cookie.setHttpOnly(true);
-            // need setSecure to be true in Production but must be false in development environment
-            cookie.setSecure(true);
-            cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
-            cookie.setPath("/");
-            response.addCookie(cookie);
-            return ResponseEntity.ok(new AuthResponse(accessToken, user.getUserId(), user.getFirstName()));
-        } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
-        }
+            CookieUtils.setCookie(response, "accessToken", accessToken);
+            CookieUtils.setCookie(response, "refreshToken", refreshToken);
 
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("userId", user.getUserId());
+            responseBody.put("firstName", user.getFirstName());
+
+            return ResponseEntity.ok(responseBody);
+        } catch (AuthenticationException ex) {
+            throw new RuntimeException("Invalid username or password");
+        }
     }
 
     public ResponseEntity<?> continueWithGoogle(GoogleApiRequest googleApiRequest, HttpServletResponse response) {
@@ -104,7 +109,7 @@ public class AuthService {
                 cookie.setPath("/");
                 response.addCookie(cookie);
 
-                return ResponseEntity.ok(new AuthResponse(accessToken, existingUser.getUserId(), existingUser.getFirstName()));
+                return ResponseEntity.ok(new AuthResponse(existingUser.getUserId(), existingUser.getFirstName()));
                 }
             catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
@@ -133,7 +138,7 @@ public class AuthService {
                 cookie.setPath("/");
                 response.addCookie(cookie);
 
-                return ResponseEntity.ok(new AuthResponse(accessToken, newUser.getUserId(), newUser.getFirstName()));
+                return ResponseEntity.ok(new AuthResponse(newUser.getUserId(), newUser.getFirstName()));
             } catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
             }
@@ -141,35 +146,63 @@ public class AuthService {
     }
 
     public ResponseEntity<?> refreshTokens(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = String.valueOf(getCookie(request, "refresh_token"));
+        String refreshToken = String.valueOf(getCookie(request, "refreshToken"));
 
-        if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token.");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid refresh token.");
         }
 
-        String userEmail = jwtUtil.extractUsername(refreshToken);
-        User user = userService.findByEmail(userEmail);
-        String newAccessToken = jwtUtil.generateAccessToken(user);
-        String newRefreshToken = jwtUtil.generateRefreshToken(user);
+        try {
+            Claims claims = jwtUtil.extractClaims(refreshToken);
 
-        Cookie refreshTokenCookie = new Cookie("refresh_token", newRefreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setMaxAge(3600 * 24 * 14); // 2 weeks
-        refreshTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
+            String userEmail = claims.getSubject();
+            Date expiration = claims.getExpiration();
 
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, user.getUserId(), user.getFirstName()));
+            if (expiration.before(new Date())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token has expired");
+            }
+
+            User user = userService.findByEmail(userEmail);
+            String newAccessToken = jwtUtil.generateAccessToken(user);
+
+            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);
+            accessTokenCookie.setMaxAge(3600 * 24 * 14); // 2 weeks
+            accessTokenCookie.setPath("/");
+            response.addCookie(accessTokenCookie);
+
+            return ResponseEntity.ok(new AuthResponse(user.getUserId(), user.getFirstName()));
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error with token validation");
+        }
+
     }
 
-    public ResponseEntity<List<Movie>> favoriteMovies(HttpServletRequest request) {
-        User user = jwtUtil.getUserFromToken(request);
+    public ResponseEntity<?> favoriteMovies(HttpServletRequest request) {
+        String token = jwtUtil.extractToken(request);
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("You must be logged in to access your favorite movies.");
+        }
+
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+
+        User user = jwtUtil.getUserFromToken(request, userDetails);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid or expired token. Please log in again.");
+        }
         List<Movie> favorites = userService.getFavoriteMovies(user);
         return ResponseEntity.ok(favorites);
     }
 
     public ResponseEntity<String> favoriteMoviesAdd(FavoriteRequest addedMovie, HttpServletRequest request) {
-        User user = jwtUtil.getUserFromToken(request);
+        String token = jwtUtil.extractToken(request);
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+        User user = jwtUtil.getUserFromToken(request, userDetails);
         try {
             userService.addMovieToFavorites(user, addedMovie);
             return ResponseEntity.ok("Movie added to favorites.");
@@ -179,7 +212,10 @@ public class AuthService {
     }
 
     public ResponseEntity<String> favoriteMoviesRemove(String imdbId, HttpServletRequest request) {
-        User user = jwtUtil.getUserFromToken(request);
+        String token = jwtUtil.extractToken(request);
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+        User user = jwtUtil.getUserFromToken(request, userDetails);
         userService.removeMovieFromFavorites(user, imdbId);
         return ResponseEntity.ok("Movie removed from favorites.");
     }

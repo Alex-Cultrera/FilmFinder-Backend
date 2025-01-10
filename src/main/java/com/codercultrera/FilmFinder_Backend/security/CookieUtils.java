@@ -8,7 +8,7 @@ public class CookieUtils {
 
     public static void setCookie(HttpServletResponse response, String name, String value) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setSecure(true); // Use true in production
         cookie.setPath("/");
         response.addCookie(cookie);

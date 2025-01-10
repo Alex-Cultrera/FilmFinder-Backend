@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.jsonwebtoken.Jwts.*;
@@ -64,9 +66,19 @@ public class JwtUtil {
                 .compact();
     }
 
-    public User getUserFromToken(HttpServletRequest request) {
+    public String extractToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        return authorizationHeader.substring(7);
+    }
+
+    public User getUserFromToken(HttpServletRequest request, UserDetails userDetails) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
-        if (validateToken(token)) {
+        if (validateToken(token, userDetails)) {
             Claims claims = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
@@ -77,12 +89,23 @@ public class JwtUtil {
         }
     }
 
-    public boolean validateToken(String token) {
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails) {
         try {
-            Jwts.parser()
-                    .setSigningKey(secretKeyForSigning)
-                    .parseClaimsJws(token);
-            return true;
+            final String username = extractUsername(token);
+            return (username.equals(userDetails.getUsername()));
+
+//            Jwts.parser()
+//                    .setSigningKey(secretKeyForSigning)
+//                    .parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             log.error("Token expired: {}", e.getMessage());
         } catch (JwtException e) {
@@ -99,7 +122,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaims(token).getSubject();
     }
 
