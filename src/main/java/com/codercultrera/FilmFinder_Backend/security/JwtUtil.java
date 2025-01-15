@@ -8,9 +8,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +30,7 @@ public class JwtUtil {
 
     private final SecretKey secretKeyForSigning;
 
-    public JwtUtil(@Value("${jwt.secret}") String secretKey, UserService userService) {
+    public JwtUtil(@Value("${jwt.secret}")String secretKey, UserService userService) {
         if (secretKey.length() < 32) {
             throw new IllegalArgumentException("The secret key should be at least 256 bits (32 bytes) long");
         }
@@ -80,7 +77,7 @@ public class JwtUtil {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         if (validateToken(token, userDetails)) {
             Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .setSigningKey(secretKeyForSigning)
                     .parseClaimsJws(token)
                     .getBody();
             return userService.findByEmail(claims.getSubject());
