@@ -1,7 +1,6 @@
 package com.codercultrera.FilmFinder_Backend.config;
 
-import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter;
-//import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter2;
+import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter2;
 import com.codercultrera.FilmFinder_Backend.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,10 +30,10 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthFilter2 jwtAuthFilter;
 //    private final JwtAuthFilter2 jwtAuthFilter2;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter2 jwtAuthFilter) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
 //        this.jwtAuthFilter2 = jwtAuthFilter2;
@@ -79,7 +77,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((request) -> {
                     request
                             .requestMatchers(
-                                    HttpMethod.POST,
+//                                    HttpMethod.POST,
                                     "/api/auth/check-email",
                                     "/api/auth/login",
                                     "/api/auth/register",
@@ -98,8 +96,8 @@ public class SecurityConfig {
                                     HttpMethod.GET,
                                     "/api/auth/favorites",
                                     "/api/auth/uploadProfilePhoto")
-                            .permitAll()
-//                            .hasAnyRole("USER", "ADMIN")
+//                            .permitAll()
+                            .hasAnyRole("USER")
 
                             .requestMatchers(
                                     HttpMethod.POST,
@@ -107,7 +105,7 @@ public class SecurityConfig {
                                     "/api/auth/removeFavorite",
                                     "/api/auth/uploadProfilePhoto",
                                     "/api/auth/hello")
-                            .hasAnyRole("USER", "ADMIN")
+                            .hasAnyRole("USER")
 
                             .requestMatchers(
                                     HttpMethod.DELETE,
@@ -116,14 +114,13 @@ public class SecurityConfig {
 
                             .anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/home")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll();
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//                .logout()
+//                .logoutUrl("/logout")
+//                .logoutSuccessUrl("/home")
+//                .invalidateHttpSession(true)
+//                .clearAuthentication(true)
+//                .deleteCookies("JSESSIONID")
 
         return http.build();
     }

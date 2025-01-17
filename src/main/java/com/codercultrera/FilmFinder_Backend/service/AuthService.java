@@ -16,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -54,7 +55,7 @@ public class AuthService {
         newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(encryptedPassword);
 
-        Role userRole = roleService.findByRoleType(RoleType.valueOf("USER"))
+        Role userRole = roleService.findByRoleType(RoleType.valueOf("ROLE_USER"))
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
         newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
         userService.save(newUser);
@@ -179,23 +180,12 @@ public class AuthService {
 
     }
 
-    public ResponseEntity<?> favoriteMovies(HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request);
-        if (token == null || token.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("You must be logged in to access your favorite movies.");
-        }
-
-        String username = jwtUtil.extractUsername(token);
-        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-
-        User user = jwtUtil.getUserFromToken(request, userDetails);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid or expired token. Please log in again.");
-        }
-        List<Movie> favorites = userService.getFavoriteMovies(user);
-        return ResponseEntity.ok(favorites);
+    public List<Movie> favoriteMovies(User user) {
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body("Invalid or expired token. Please log in again.");
+//        }
+        return userService.getFavoriteMovies(user);
     }
 
     public ResponseEntity<String> favoriteMoviesAdd(FavoriteRequest addedMovie, HttpServletRequest request) {

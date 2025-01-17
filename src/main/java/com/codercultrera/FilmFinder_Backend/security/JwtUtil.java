@@ -38,7 +38,8 @@ public class JwtUtil {
         this.userService = userService;
     }
 
-    private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
+//    private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
+    private final long accessTokenValidity = 5000L;
     private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
 
     public String generateAccessToken(User user) {
@@ -75,7 +76,7 @@ public class JwtUtil {
 
     public User getUserFromToken(HttpServletRequest request, UserDetails userDetails) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
-        if (validateToken(token, userDetails)) {
+        if (validateToken(token)) {
             Claims claims = Jwts.parser()
                     .setSigningKey(secretKeyForSigning)
                     .parseClaimsJws(token)
@@ -95,14 +96,15 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token) {
         try {
-            final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()));
+//            final String username = extractUsername(token);
+//            return (username.equals(userDetails.getUsername()));
 
-//            Jwts.parser()
-//                    .setSigningKey(secretKeyForSigning)
-//                    .parseClaimsJws(token);
+            Jwts.parser()
+                    .setSigningKey(secretKeyForSigning)
+                    .parseClaimsJws(token);
+            return true;
         } catch (ExpiredJwtException e) {
             log.error("Token expired: {}", e.getMessage());
         } catch (JwtException e) {
@@ -129,7 +131,11 @@ public class JwtUtil {
     }
 
     public boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
+        try {
+            return extractClaims(token).getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
 }
