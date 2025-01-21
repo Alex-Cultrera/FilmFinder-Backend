@@ -1,6 +1,6 @@
 package com.codercultrera.FilmFinder_Backend.config;
 
-import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter2;
+import com.codercultrera.FilmFinder_Backend.security.JwtAuthFilter;
 import com.codercultrera.FilmFinder_Backend.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -30,24 +30,13 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthFilter2 jwtAuthFilter;
-//    private final JwtAuthFilter2 jwtAuthFilter2;
+    private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter2 jwtAuthFilter) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
-//        this.jwtAuthFilter2 = jwtAuthFilter2;
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setUserDetailsService(customUserDetailsService);
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        AuthenticationManagerBuilder authManager = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authManager.authenticationProvider(authProvider);
-//        return authManager.build();
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -71,16 +60,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-//                .cors(Customizer.withDefaults())
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests((request) -> {
                     request
                             .requestMatchers(
-//                                    HttpMethod.POST,
                                     "/api/auth/check-email",
                                     "/api/auth/login",
                                     "/api/auth/register",
+                                    "/api/auth/favorites",
                                     "/api/auth/google")
                             .permitAll()
 
@@ -94,9 +82,7 @@ public class SecurityConfig {
 
                             .requestMatchers(
                                     HttpMethod.GET,
-                                    "/api/auth/favorites",
                                     "/api/auth/uploadProfilePhoto")
-//                            .permitAll()
                             .hasAnyRole("USER")
 
                             .requestMatchers(

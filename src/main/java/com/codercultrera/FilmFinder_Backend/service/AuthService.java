@@ -181,10 +181,9 @@ public class AuthService {
     }
 
     public List<Movie> favoriteMovies(User user) {
-//        if (user == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-//                    .body("Invalid or expired token. Please log in again.");
-//        }
+        if (user == null) {
+            return null;
+        }
         return userService.getFavoriteMovies(user);
     }
 
