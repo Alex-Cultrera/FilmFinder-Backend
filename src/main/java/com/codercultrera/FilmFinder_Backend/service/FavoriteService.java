@@ -90,7 +90,7 @@ public class FavoriteService {
             userRepo.save(user);
             return "Movie added to favorites.";
         } catch (Exception e) {
-            throw new RuntimeException("Error in addMovieToFavorites: " + e.getMessage(), e);
+            throw new RuntimeException("Error in addFavoriteMovie: " + e.getMessage(), e);
         }
     }
 
@@ -121,7 +121,7 @@ public class FavoriteService {
                 return "Movie not found in favorites.";
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error in removeMovieFromFavorites: " + e.getMessage(), e);
+            throw new RuntimeException("Error in removeFavoriteMovie: " + e.getMessage(), e);
         }
 
     }

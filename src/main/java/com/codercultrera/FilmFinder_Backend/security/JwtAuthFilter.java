@@ -36,7 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        System.out.println("JwtAuthFilter is processing the request...");
+        log.debug("JwtAuthFilter is processing the request for path: {}", request.getRequestURI());
 
         String path = request.getRequestURI();
         if (path.matches("/api/auth/login")) {
@@ -47,20 +47,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String accessToken = CookieUtils.getTokenFromCookie(request, "accessToken");
         String refreshToken = CookieUtils.getTokenFromCookie(request, "refreshToken");
 
-        if (accessToken != null) {
+        if (accessToken == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
             if (jwtUtil.isTokenExpired(accessToken) && refreshToken != null && jwtUtil.validateToken(refreshToken)) {
                 String email = jwtUtil.extractEmail(refreshToken);
                 User user = (User) userDetailsService.loadUserByUsername(email);
                 String newAccessToken = jwtUtil.generateAccessToken(user);
-
                 CookieUtils.setCookie(response, "accessToken", newAccessToken);
                 accessToken = newAccessToken;
             }
 
             if (jwtUtil.validateToken(accessToken)) {
-                // if (path.matches("/api/auth/favorites")) {
-                // return;
-                // }
                 String email = jwtUtil.extractEmail(accessToken);
                 User user = (User) userDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -70,10 +71,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
-                return;
             }
+        } catch (Exception e) {
+            log.error("Authentication error: ", e);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication error: " + e.getMessage());
         }
-        filterChain.doFilter(request, response);
     }
 
     private List<GrantedAuthority> extractAuthoritiesFromJwt(String jwt) {
