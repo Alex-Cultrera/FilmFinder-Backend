@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,42 +16,39 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class Movie {
-    @Id
-    private String imdbId;
-    private String title;
-    private String year;
-    private String type;
-    private String poster;
+        @Id
+        private String imdbId;
+        private String title;
+        private String year;
+        private String type;
+        private String posterUrl;
 
-    @ManyToMany(mappedBy = "favoriteMovies")
-    private List<User> usersWhoFavorited = new ArrayList<>();
+        @JsonIgnore
+        @ManyToMany(mappedBy = "favoriteMovies")
+        private List<User> usersWhoFavorited = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "reviewedMovies")
-    private List<User> usersWhoReviewed = new ArrayList<>();
+        @JsonIgnore
+        @ManyToMany(mappedBy = "reviewedMovies")
+        private List<User> usersWhoReviewed = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "watchedMovies")
-    private List<User> usersWhoWatched = new ArrayList<>();
+        @JsonIgnore
+        @ManyToMany(mappedBy = "watchedMovies")
+        private List<User> usersWhoWatched = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "queuedMovies")
-    private List<User> usersWhoQueued = new ArrayList<>();
+        @JsonIgnore
+        @ManyToMany(mappedBy = "queuedMovies")
+        private List<User> usersWhoQueued = new ArrayList<>();
 
-    private String rated;
-    private String runtime;
-    private String plot;
-    private String releaseDate;
+        private String rated;
+        private String runtime;
+        private String plot;
+        private String releaseDate;
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    @JoinTable(name = "movie_actors",
-            joinColumns = @JoinColumn(name = "imdb_id"),
-            inverseJoinColumns = @JoinColumn(name = "actor_id"))
-    private List<Actor> actors;
+        @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+        @JoinTable(name = "movie_actors", joinColumns = @JoinColumn(name = "imdb_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
+        private List<Actor> actors;
 
-    @OneToMany(mappedBy = "movie")
-    private List<Review> reviews = new ArrayList<>();
-
-
-
-
+        @OneToMany(mappedBy = "movie")
+        private List<Review> reviews = new ArrayList<>();
 
 }

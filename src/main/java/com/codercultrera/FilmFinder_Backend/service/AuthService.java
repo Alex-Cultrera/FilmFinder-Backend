@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -36,7 +37,8 @@ public class AuthService {
     private final RoleService roleService;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthService(JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserService userService, RoleService roleService, CustomUserDetailsService customUserDetailsService) {
+    public AuthService(JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserService userService,
+            RoleService roleService, CustomUserDetailsService customUserDetailsService) {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
@@ -68,9 +70,7 @@ public class AuthService {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
-                            loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -111,8 +111,7 @@ public class AuthService {
                 response.addCookie(cookie);
 
                 return ResponseEntity.ok(new AuthResponse(existingUser.getUserId(), existingUser.getFirstName()));
-                }
-            catch (BadCredentialsException ex) {
+            } catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
             }
         } else {
@@ -187,67 +186,69 @@ public class AuthService {
         return userService.getFavoriteMovies(user);
     }
 
-    public ResponseEntity<String> favoriteMoviesAdd(FavoriteRequest addedMovie, HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request);
-        String username = jwtUtil.extractUsername(token);
-        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-        User user = jwtUtil.getUserFromToken(request, userDetails);
+    @Transactional
+    public String favoriteMoviesAdd(User user, FavoriteRequest addedMovie) {
         try {
             userService.addMovieToFavorites(user, addedMovie);
-            return ResponseEntity.ok("Movie added to favorites.");
+            return "Movie added to favorites.";
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error adding movie to favorites.");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to add movie to favorites: " + e.getMessage(), e);
         }
     }
 
-    public ResponseEntity<String> favoriteMoviesRemove(String imdbId, HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request);
-        String username = jwtUtil.extractUsername(token);
-        UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-        User user = jwtUtil.getUserFromToken(request, userDetails);
-        userService.removeMovieFromFavorites(user, imdbId);
-        return ResponseEntity.ok("Movie removed from favorites.");
+    @Transactional
+    public String favoriteMoviesRemove(User user, String imdbId) {
+        try {
+            userService.removeMovieFromFavorites(user, imdbId);
+            return "Movie removed from favorites.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to remove movie from favorites: " + e.getMessage(), e);
+        }
     }
-
-
 
     public ResponseEntity<?> continueWithFacebook(String code) {
         return null;
     }
 
-
-
-//    public ResponseEntity<?> uploadProfilePhoto(MultipartFile file) {
-//        try {
-//            // Generate a unique filename for the uploaded file
-//            String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-//            Path path = Paths.get(profilePhotosDirectory + "/" + fileName);
-//
-//            // Save the file to the server
-//            Files.copy(file.getInputStream(), path);
-//
-//            // Construct the URL of the uploaded image
-//            String photoUrl = "/images/profiles/" + fileName; // Adjust the path as needed
-//
-//            // Update the user profile (assume userService.updateProfilePhoto() is implemented)
-//            String userId = "some-logged-in-user-id"; // Get this from the current session or authentication context
-//            userService.updateProfilePhoto(userId, photoUrl);
-//
-//            return ResponseEntity.status(HttpStatus.OK).body(new ProfilePhotoResponse(photoUrl));
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file");
-//        }
-//    }
-//
-//    public ResponseEntity<?> getPhoto(String userId) {
-//        Optional<User> user = userService.findById(userId);
-//        if (user.isPresent()) {
-//            return ResponseEntity.ok(new ProfilePhotoResponse(user.get().getPhoto()));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-//        }
-//    }
+    // public ResponseEntity<?> uploadProfilePhoto(MultipartFile file) {
+    // try {
+    // // Generate a unique filename for the uploaded file
+    // String fileName = UUID.randomUUID().toString() + "-" +
+    // file.getOriginalFilename();
+    // Path path = Paths.get(profilePhotosDirectory + "/" + fileName);
+    //
+    // // Save the file to the server
+    // Files.copy(file.getInputStream(), path);
+    //
+    // // Construct the URL of the uploaded image
+    // String photoUrl = "/images/profiles/" + fileName; // Adjust the path as
+    // needed
+    //
+    // // Update the user profile (assume userService.updateProfilePhoto() is
+    // implemented)
+    // String userId = "some-logged-in-user-id"; // Get this from the current
+    // session or authentication context
+    // userService.updateProfilePhoto(userId, photoUrl);
+    //
+    // return ResponseEntity.status(HttpStatus.OK).body(new
+    // ProfilePhotoResponse(photoUrl));
+    //
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+    // uploading file");
+    // }
+    // }
+    //
+    // public ResponseEntity<?> getPhoto(String userId) {
+    // Optional<User> user = userService.findById(userId);
+    // if (user.isPresent()) {
+    // return ResponseEntity.ok(new ProfilePhotoResponse(user.get().getPhoto()));
+    // } else {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    // }
+    // }
 
 }

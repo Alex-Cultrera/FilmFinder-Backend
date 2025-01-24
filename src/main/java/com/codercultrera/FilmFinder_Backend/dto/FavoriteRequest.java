@@ -9,7 +9,7 @@ public class FavoriteRequest {
 
     String imdbId;
     String title;
-    String poster;
+    String posterUrl;
     String year;
     String type;
 }

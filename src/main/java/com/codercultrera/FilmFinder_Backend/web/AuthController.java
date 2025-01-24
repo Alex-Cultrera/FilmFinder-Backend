@@ -69,23 +69,36 @@ public class AuthController {
     }
 
     @GetMapping("/favorites")
-    public ResponseEntity<List<Movie>> getFavoriteMovies(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<MovieResponseDTO>> getFavoriteMovies(@AuthenticationPrincipal User user) {
         List<Movie> favorites = authService.favoriteMovies(user);
-        return ResponseEntity.ok(favorites);
+        List<MovieResponseDTO> favoriteDTOs = favorites.stream()
+                .map(MovieResponseDTO::new)
+                .toList();
+        return ResponseEntity.ok(favoriteDTOs);
     }
 
     @PostMapping("/addFavorite")
-    public ResponseEntity<String> addFavoriteMovie(@RequestBody FavoriteRequest addedMovie, HttpServletRequest request) {
-        return authService.favoriteMoviesAdd(addedMovie, request);
+    public ResponseEntity<String> addFavoriteMovie(@AuthenticationPrincipal User user,
+            @RequestBody FavoriteRequest addedMovie) {
+        System.out.println("Received request to add favorite movie:");
+        System.out.println("User: " + user.getEmail());
+        System.out.println("Movie: " + addedMovie.getImdbId() + " - " + addedMovie.getTitle());
+        String response = authService.favoriteMoviesAdd(user, addedMovie);
+        System.out.println(response);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/removeFavorite")
-    public ResponseEntity<String> removeFavoriteMovie(@RequestBody String imdbId, HttpServletRequest request) {
-        return authService.favoriteMoviesRemove(imdbId, request);
+    public ResponseEntity<String> removeFavoriteMovie(@AuthenticationPrincipal User user,
+            @RequestBody String imdbId) {
+        String response = authService.favoriteMoviesRemove(user, imdbId);
+        System.out.println(response);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/uploadProfilePhoto")
-    public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId,
+            @RequestParam("file") MultipartFile file) {
         try {
             Long myId = Long.parseLong(userId);
             if (file.isEmpty()) {

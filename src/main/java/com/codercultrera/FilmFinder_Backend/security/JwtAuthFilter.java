@@ -34,7 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         System.out.println("JwtAuthFilter is processing the request...");
 
         String path = request.getRequestURI();
@@ -57,22 +58,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             if (jwtUtil.validateToken(accessToken)) {
+                // if (path.matches("/api/auth/favorites")) {
+                // return;
+                // }
                 String email = jwtUtil.extractEmail(accessToken);
                 User user = (User) userDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        user, null, null);
+                        user, null, user.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                return;
+                filterChain.doFilter(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
                 return;
             }
         }
-//        else {
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No JWT token provided");
-//            return;
-//        }
         filterChain.doFilter(request, response);
     }
 

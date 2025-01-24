@@ -38,8 +38,8 @@ public class JwtUtil {
         this.userService = userService;
     }
 
-//    private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
-    private final long accessTokenValidity = 5000L;
+    private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
+//    private final long accessTokenValidity = 5000L; // 5 seconds
     private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
 
     public String generateAccessToken(User user) {

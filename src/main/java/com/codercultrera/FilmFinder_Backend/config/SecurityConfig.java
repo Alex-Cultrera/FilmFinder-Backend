@@ -37,7 +37,6 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
@@ -101,12 +100,12 @@ public class SecurityConfig {
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//                .logout()
-//                .logoutUrl("/logout")
-//                .logoutSuccessUrl("/home")
-//                .invalidateHttpSession(true)
-//                .clearAuthentication(true)
-//                .deleteCookies("JSESSIONID")
+        // .logout()
+        // .logoutUrl("/logout")
+        // .logoutSuccessUrl("/home")
+        // .invalidateHttpSession(true)
+        // .clearAuthentication(true)
+        // .deleteCookies("JSESSIONID")
 
         return http.build();
     }
@@ -115,8 +114,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app", "http://localhost:8080"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app",
+                "http://localhost:8080"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With",
+                "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

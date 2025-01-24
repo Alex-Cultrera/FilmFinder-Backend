@@ -9,11 +9,13 @@ import io.jsonwebtoken.io.IOException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
+@Slf4j
 @Service
 public class UserService {
 
@@ -67,53 +69,94 @@ public class UserService {
     }
 
     public List<Movie> getFavoriteMovies(User user) {
-        return user.getFavoriteMovies();
+        try {
+            User theUser = userRepo.findById(user.getUserId()).orElseThrow();
+            log.info("User ID: {}", theUser.getUserId());
+            log.info("Total favorite movies: {}", theUser.getFavoriteMovies().size());
+            log.info("Retrieved favorite movies: {}",
+                    theUser.getFavoriteMovies().stream().map(m -> String.format("%s (%s)", m.getTitle(), m.getImdbId()))
+                            .toList());
+            return theUser.getFavoriteMovies();
+        } catch (Exception e) {
+            throw new RuntimeException("Error in getFavoriteMovies: " + e.getMessage(), e);
+        }
     }
 
     @Transactional
     public void addMovieToFavorites(User user, FavoriteRequest addedMovie) {
-        Optional<Movie> optionalMovie = movieService.findByImdbId(addedMovie.getImdbId());
-        Movie movie;
+        try {
+            user = userRepo.findById(user.getUserId()).orElseThrow();
 
-        if (optionalMovie.isPresent()) {
-            movie = optionalMovie.get();
-            boolean isFavorite = user.getFavoriteMovies().stream()
-                    .anyMatch(favoriteMovie -> favoriteMovie.getImdbId().equals(movie.getImdbId()));
+            Optional<Movie> optionalMovie = movieService.findByImdbId(addedMovie.getImdbId());
+            Movie movie;
 
-            if (isFavorite) {
-                return;
+            if (optionalMovie.isPresent()) {
+                movie = optionalMovie.get();
+                if (user.getFavoriteMovies() == null) {
+                    user.setFavoriteMovies(new ArrayList<>());
+                }
+
+                boolean isFavorite = user.getFavoriteMovies().stream()
+                        .anyMatch(favoriteMovie -> favoriteMovie.getImdbId().equals(movie.getImdbId()));
+
+                if (isFavorite) {
+                    return;
+                }
+
+                if (movie.getUsersWhoFavorited() == null) {
+                    movie.setUsersWhoFavorited(new ArrayList<>());
+                }
+
+                movie.getUsersWhoFavorited().add(user);
+                user.getFavoriteMovies().add(movie);
+            } else {
+                movie = new Movie();
+                movie.setImdbId(addedMovie.getImdbId());
+                movie.setTitle(addedMovie.getTitle());
+                movie.setPosterUrl(addedMovie.getPosterUrl());
+                movie.setYear(addedMovie.getYear());
+                movie.setType(addedMovie.getType());
+                movie.setUsersWhoFavorited(new ArrayList<>());
+                movie.getUsersWhoFavorited().add(user);
+
+                if (user.getFavoriteMovies() == null) {
+                    user.setFavoriteMovies(new ArrayList<>());
+                }
+                user.getFavoriteMovies().add(movie);
             }
-            movie.getUsersWhoFavorited().add(user);
-            user.getFavoriteMovies().add(movie);
-            userRepo.save(user);
-            movieService.save(movie);
-        } else {
-            movie = new Movie();
-            movie.setImdbId(addedMovie.getImdbId());
-            movie.setTitle(addedMovie.getTitle());
-            movie.setPoster(addedMovie.getPoster());
-            movie.setYear(addedMovie.getYear());
-            movie.setType(addedMovie.getType());
-            movie.getUsersWhoFavorited().add(user);
-            user.getFavoriteMovies().add(movie);
+
             movieService.save(movie);
             userRepo.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in addMovieToFavorites: " + e.getMessage(), e);
         }
     }
 
     @Transactional
     public void removeMovieFromFavorites(User user, String imdbId) {
-        Optional<Movie> optionalMovie = movieService.findByImdbId(imdbId);
-        Movie movie;
-        if (optionalMovie.isPresent()) {
-            movie = optionalMovie.get();
-            if (!movie.getUsersWhoFavorited().contains(user)) {
-                throw new RuntimeException("Movie not in this users favorites list.");
+        try {
+            user = userRepo.findById(user.getUserId()).orElseThrow();
+
+            Optional<Movie> optionalMovie = movieService.findByImdbId(imdbId);
+            Movie movie;
+
+            if (optionalMovie.isPresent()) {
+                movie = optionalMovie.get();
+
+                boolean isFavorite = user.getFavoriteMovies().stream()
+                        .anyMatch(favoriteMovie -> favoriteMovie.getImdbId().equals(movie.getImdbId()));
+
+                if (isFavorite) {
+                    user.getFavoriteMovies().remove(movie);
+                    movie.getUsersWhoFavorited().remove(user);
+                    userRepo.save(user);
+                    movieService.save(movie);
+                }
+
             }
-            user.getFavoriteMovies().remove(movie);
-            movie.getUsersWhoFavorited().remove(user);
-            userRepo.save(user);
-            movieService.save(movie);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in removeMovieFromFavorites: " + e.getMessage(), e);
         }
+
     }
 }
