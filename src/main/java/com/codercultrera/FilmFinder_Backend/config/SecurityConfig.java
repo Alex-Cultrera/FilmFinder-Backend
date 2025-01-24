@@ -29,99 +29,100 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthFilter jwtAuthFilter;
+        private final CustomUserDetailsService customUserDetailsService;
+        private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.jwtAuthFilter = jwtAuthFilter;
-    }
+        public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
+                this.customUserDetailsService = customUserDetailsService;
+                this.jwtAuthFilter = jwtAuthFilter;
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder(12);
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+                return authConfig.getAuthenticationManager();
+        }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+        @Bean
+        public DaoAuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+                authProvider.setUserDetailsService(customUserDetailsService);
+                authProvider.setPasswordEncoder(passwordEncoder());
+                return authProvider;
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .authorizeHttpRequests((request) -> {
-                    request
-                            .requestMatchers(
-                                    "/api/auth/check-email",
-                                    "/api/auth/login",
-                                    "/api/auth/register",
-                                    "/api/auth/favorites",
-                                    "/api/auth/google")
-                            .permitAll()
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+                                .authorizeHttpRequests((request) -> {
+                                        request
+                                                        .requestMatchers(
+                                                                        "/api/auth/check-email",
+                                                                        "/api/auth/login",
+                                                                        "/api/auth/register",
+                                                                        "/favorites",
+                                                                        "/api/auth/google")
+                                                        .permitAll()
 
-                            .requestMatchers(
-                                    HttpMethod.OPTIONS)
-                            .permitAll()
+                                                        .requestMatchers(
+                                                                        HttpMethod.OPTIONS)
+                                                        .permitAll()
 
-                            .requestMatchers(
-                                    "/admin/**")
-                            .hasRole("ADMIN")
+                                                        .requestMatchers(
+                                                                        "/admin/**")
+                                                        .hasRole("ADMIN")
 
-                            .requestMatchers(
-                                    HttpMethod.GET,
-                                    "/api/auth/uploadProfilePhoto")
-                            .hasAnyRole("USER")
+                                                        .requestMatchers(
+                                                                        HttpMethod.GET,
+                                                                        "/api/auth/uploadProfilePhoto")
+                                                        .hasAnyRole("USER")
 
-                            .requestMatchers(
-                                    HttpMethod.POST,
-                                    "/api/auth/addFavorite",
-                                    "/api/auth/removeFavorite",
-                                    "/api/auth/uploadProfilePhoto",
-                                    "/api/auth/hello")
-                            .hasAnyRole("USER")
+                                                        .requestMatchers(
+                                                                        HttpMethod.POST,
+                                                                        "/addFavorite",
+                                                                        "/removeFavorite",
+                                                                        "/api/auth/uploadProfilePhoto",
+                                                                        "/api/auth/hello")
+                                                        .hasAnyRole("USER")
 
-                            .requestMatchers(
-                                    HttpMethod.DELETE,
-                                    "/api/auth/uploadProfilePhoto")
-                            .hasRole("ADMIN")
+                                                        .requestMatchers(
+                                                                        HttpMethod.DELETE,
+                                                                        "/api/auth/uploadProfilePhoto")
+                                                        .hasRole("ADMIN")
 
-                            .anyRequest().authenticated();
-                })
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        // .logout()
-        // .logoutUrl("/logout")
-        // .logoutSuccessUrl("/home")
-        // .invalidateHttpSession(true)
-        // .clearAuthentication(true)
-        // .deleteCookies("JSESSIONID")
+                                                        .anyRequest().authenticated();
+                                })
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // .logout()
+                // .logoutUrl("/logout")
+                // .logoutSuccessUrl("/home")
+                // .invalidateHttpSession(true)
+                // .clearAuthentication(true)
+                // .deleteCookies("JSESSIONID")
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app",
-                "http://localhost:8080"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With",
-                "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowCredentials(true);
+                configuration.setAllowedOrigins(
+                                List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app",
+                                                "http://localhost:8080"));
+                configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With",
+                                "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
 }

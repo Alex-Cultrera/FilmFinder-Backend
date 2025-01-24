@@ -68,34 +68,6 @@ public class AuthController {
         return authService.refreshTokens(request, response);
     }
 
-    @GetMapping("/favorites")
-    public ResponseEntity<List<MovieResponseDTO>> getFavoriteMovies(@AuthenticationPrincipal User user) {
-        List<Movie> favorites = authService.favoriteMovies(user);
-        List<MovieResponseDTO> favoriteDTOs = favorites.stream()
-                .map(MovieResponseDTO::new)
-                .toList();
-        return ResponseEntity.ok(favoriteDTOs);
-    }
-
-    @PostMapping("/addFavorite")
-    public ResponseEntity<String> addFavoriteMovie(@AuthenticationPrincipal User user,
-            @RequestBody FavoriteRequest addedMovie) {
-        System.out.println("Received request to add favorite movie:");
-        System.out.println("User: " + user.getEmail());
-        System.out.println("Movie: " + addedMovie.getImdbId() + " - " + addedMovie.getTitle());
-        String response = authService.favoriteMoviesAdd(user, addedMovie);
-        System.out.println(response);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/removeFavorite")
-    public ResponseEntity<String> removeFavoriteMovie(@AuthenticationPrincipal User user,
-            @RequestBody String imdbId) {
-        String response = authService.favoriteMoviesRemove(user, imdbId);
-        System.out.println(response);
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/uploadProfilePhoto")
     public ResponseEntity<?> postProfilePhoto(@RequestParam("userId") String userId,
             @RequestParam("file") MultipartFile file) {

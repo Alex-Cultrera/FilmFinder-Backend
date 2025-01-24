@@ -1,14 +1,13 @@
 package com.codercultrera.FilmFinder_Backend.service;
 
-import com.codercultrera.FilmFinder_Backend.domain.*;
-import com.codercultrera.FilmFinder_Backend.dto.*;
-import com.codercultrera.FilmFinder_Backend.security.CookieUtils;
-import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.web.util.WebUtils.getCookie;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,16 +15,26 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.codercultrera.FilmFinder_Backend.domain.Role;
+import com.codercultrera.FilmFinder_Backend.domain.RoleType;
+import com.codercultrera.FilmFinder_Backend.domain.User;
+import com.codercultrera.FilmFinder_Backend.dto.ApiResponse;
+import com.codercultrera.FilmFinder_Backend.dto.AuthResponse;
+import com.codercultrera.FilmFinder_Backend.dto.GoogleApiRequest;
+import com.codercultrera.FilmFinder_Backend.dto.LoginRequest;
+import com.codercultrera.FilmFinder_Backend.dto.RegisterRequest;
+import com.codercultrera.FilmFinder_Backend.security.CookieUtils;
+import com.codercultrera.FilmFinder_Backend.security.JwtUtil;
 
-import static org.springframework.web.util.WebUtils.getCookie;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -177,35 +186,6 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error with token validation");
         }
 
-    }
-
-    public List<Movie> favoriteMovies(User user) {
-        if (user == null) {
-            return null;
-        }
-        return userService.getFavoriteMovies(user);
-    }
-
-    @Transactional
-    public String favoriteMoviesAdd(User user, FavoriteRequest addedMovie) {
-        try {
-            userService.addMovieToFavorites(user, addedMovie);
-            return "Movie added to favorites.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to add movie to favorites: " + e.getMessage(), e);
-        }
-    }
-
-    @Transactional
-    public String favoriteMoviesRemove(User user, String imdbId) {
-        try {
-            userService.removeMovieFromFavorites(user, imdbId);
-            return "Movie removed from favorites.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to remove movie from favorites: " + e.getMessage(), e);
-        }
     }
 
     public ResponseEntity<?> continueWithFacebook(String code) {
