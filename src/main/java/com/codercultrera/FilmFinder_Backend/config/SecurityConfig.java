@@ -67,6 +67,8 @@ public class SecurityConfig {
                                                                         "/api/auth/check-email",
                                                                         "/api/auth/login",
                                                                         "/api/auth/register",
+                                                                        "/queued",
+                                                                        "/watched",
                                                                         "/favorites",
                                                                         "/api/auth/google")
                                                         .permitAll()
@@ -86,10 +88,13 @@ public class SecurityConfig {
 
                                                         .requestMatchers(
                                                                         HttpMethod.POST,
+                                                                        "/addQueued",
+                                                                        "/addWatched",
                                                                         "/addFavorite",
+                                                                        "/removeQueued",
+                                                                        "/removeWatched",
                                                                         "/removeFavorite",
-                                                                        "/api/auth/uploadProfilePhoto",
-                                                                        "/api/auth/hello")
+                                                                        "/api/auth/uploadProfilePhoto")
                                                         .hasAnyRole("USER")
 
                                                         .requestMatchers(

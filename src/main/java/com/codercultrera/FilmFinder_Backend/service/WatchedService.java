@@ -16,28 +16,28 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class FavoriteService {
+public class WatchedService {
 
     private final UserRepository userRepo;
     private final MovieService movieService;
 
-    public FavoriteService(UserRepository userRepo, MovieService movieService) {
+    public WatchedService(UserRepository userRepo, MovieService movieService) {
         this.userRepo = userRepo;
         this.movieService = movieService;
     }
 
-    public List<Movie> getFavoriteMovies(User user) {
+    public List<Movie> getWatchedMovies(User user) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total favorite movies: {}", theUser.getFavoriteMovies().size());
-            return theUser.getFavoriteMovies();
+            log.info("Total watched movies: {}", theUser.getWatchedMovies().size());
+            return theUser.getWatchedMovies();
         } catch (Exception e) {
-            throw new RuntimeException("Error in getFavoriteMovies: " + e.getMessage(), e);
+            throw new RuntimeException("Error in getWatchedMovies: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public String addFavoriteMovie(User user, MovieAddRequest addedMovie) {
+    public String addWatchedMovie(User user, MovieAddRequest addedMovie) {
         try {
             user = userRepo.findById(user.getUserId()).orElseThrow();
 
@@ -46,23 +46,23 @@ public class FavoriteService {
 
             if (optionalMovie.isPresent()) {
                 movie = optionalMovie.get();
-                if (user.getFavoriteMovies() == null) {
-                    user.setFavoriteMovies(new ArrayList<>());
+                if (user.getWatchedMovies() == null) {
+                    user.setWatchedMovies(new ArrayList<>());
                 }
 
-                boolean isFavorite = user.getFavoriteMovies().stream()
-                        .anyMatch(favoriteMovie -> favoriteMovie.getImdbId().equals(movie.getImdbId()));
+                boolean isWatched = user.getWatchedMovies().stream()
+                        .anyMatch(watchedMovie -> watchedMovie.getImdbId().equals(movie.getImdbId()));
 
-                if (isFavorite) {
+                if (isWatched) {
                     return "Movie already in favorites.";
                 }
 
-                if (movie.getUsersWhoFavorited() == null) {
-                    movie.setUsersWhoFavorited(new ArrayList<>());
+                if (movie.getUsersWhoWatched() == null) {
+                    movie.setUsersWhoWatched(new ArrayList<>());
                 }
 
-                movie.getUsersWhoFavorited().add(user);
-                user.getFavoriteMovies().add(movie);
+                movie.getUsersWhoWatched().add(user);
+                user.getWatchedMovies().add(movie);
             } else {
                 movie = new Movie();
                 movie.setImdbId(addedMovie.getImdbId());
@@ -70,25 +70,25 @@ public class FavoriteService {
                 movie.setPosterUrl(addedMovie.getPosterUrl());
                 movie.setYear(addedMovie.getYear());
                 movie.setType(addedMovie.getType());
-                movie.setUsersWhoFavorited(new ArrayList<>());
-                movie.getUsersWhoFavorited().add(user);
+                movie.setUsersWhoWatched(new ArrayList<>());
+                movie.getUsersWhoWatched().add(user);
 
-                if (user.getFavoriteMovies() == null) {
-                    user.setFavoriteMovies(new ArrayList<>());
+                if (user.getWatchedMovies() == null) {
+                    user.setWatchedMovies(new ArrayList<>());
                 }
-                user.getFavoriteMovies().add(movie);
+                user.getWatchedMovies().add(movie);
             }
 
             movieService.save(movie);
             userRepo.save(user);
-            return "Movie added to favorites.";
+            return "Movie added to watched list.";
         } catch (Exception e) {
-            throw new RuntimeException("Error in addFavoriteMovie: " + e.getMessage(), e);
+            throw new RuntimeException("Error in getWatchedMovie: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public String removeFavoriteMovie(User user, String imdbId) {
+    public String removeWatchedMovie(User user, String imdbId) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
 
@@ -96,20 +96,21 @@ public class FavoriteService {
 
             if (optionalMovie.isPresent()) {
                 Movie movie = optionalMovie.get();
+                log.debug("Found movie: {}", movie.getTitle());
 
-                theUser.getFavoriteMovies().removeIf(m -> m.getImdbId().equals(imdbId));
+                theUser.getWatchedMovies().removeIf(m -> m.getImdbId().equals(imdbId));
 
-                movie.getUsersWhoFavorited().removeIf(u -> u.getUserId().equals(theUser.getUserId()));
+                movie.getUsersWhoWatched().removeIf(u -> u.getUserId().equals(theUser.getUserId()));
 
                 userRepo.save(user);
                 movieService.save(movie);
 
-                return "Movie removed from favorites.";
+                return "Movie removed from watched list.";
             } else {
-                return "Movie not found in favorites.";
+                return "Movie not found in watched list.";
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error in removeFavoriteMovie: " + e.getMessage(), e);
+            throw new RuntimeException("Error in removeWatchedMovie: " + e.getMessage(), e);
         }
 
     }

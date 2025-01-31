@@ -13,51 +13,51 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codercultrera.FilmFinder_Backend.domain.Movie;
 import com.codercultrera.FilmFinder_Backend.domain.User;
-import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieAddRequest;
+import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieResponseDTO;
-import com.codercultrera.FilmFinder_Backend.service.FavoriteService;
+import com.codercultrera.FilmFinder_Backend.service.QueuedService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("")
-public class FavoriteController {
+public class QueuedController {
 
-    private final FavoriteService favoriteService;
+    private final QueuedService queuedService;
 
-    public FavoriteController(FavoriteService favoriteService) {
-        this.favoriteService = favoriteService;
+    public QueuedController(QueuedService queuedService) {
+        this.queuedService = queuedService;
     }
 
     // READ
-    @GetMapping("/favorites")
-    public ResponseEntity<?> getFavoriteMovies(@AuthenticationPrincipal User user) {
+    @GetMapping("/queued")
+    public ResponseEntity<?> getQueuedMovies(@AuthenticationPrincipal User user) {
         if (user == null) {
             // Return empty list with 200 status for unauthenticated users
             return ResponseEntity.ok(Collections.emptyList());
         }
-        List<Movie> favorites = favoriteService.getFavoriteMovies(user);
-        List<MovieResponseDTO> favoriteDTOs = favorites.stream()
+        List<Movie> queued = queuedService.getQueuedMovies(user);
+        List<MovieResponseDTO> queuedDTOs = queued.stream()
                 .map(MovieResponseDTO::new)
                 .toList();
-        return ResponseEntity.ok(favoriteDTOs);
+        return ResponseEntity.ok(queuedDTOs);
     }
 
     // CREATE / UPDATE
-    @PostMapping("/addFavorite")
-    public ResponseEntity<String> addFavoriteMovie(@AuthenticationPrincipal User user,
+    @PostMapping("/addQueued")
+    public ResponseEntity<String> addQueuedMovie(@AuthenticationPrincipal User user,
             @RequestBody MovieAddRequest addedMovie) {
-        String response = favoriteService.addFavoriteMovie(user, addedMovie);
+        String response = queuedService.addQueuedMovie(user, addedMovie);
         return ResponseEntity.ok(response);
     }
 
     // DELETE
-    @PostMapping("/removeFavorite")
-    public ResponseEntity<String> removeFavoriteMovie(@AuthenticationPrincipal User user,
+    @PostMapping("/removeQueued")
+    public ResponseEntity<String> removeQueuedMovie(@AuthenticationPrincipal User user,
             @RequestBody MovieRemoveRequest movieToRemove) {
-        String response = favoriteService.removeFavoriteMovie(user, movieToRemove.getImdbId());
+        String response = queuedService.removeQueuedMovie(user, movieToRemove.getImdbId());
         return ResponseEntity.ok(response);
     }
 

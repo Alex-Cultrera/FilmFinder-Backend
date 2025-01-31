@@ -5,11 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FavoriteRequest {
-
+public class MovieRemoveRequest {
     String imdbId;
-    String title;
-    String posterUrl;
-    String year;
-    String type;
 }

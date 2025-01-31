@@ -16,28 +16,28 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class FavoriteService {
+public class QueuedService {
 
     private final UserRepository userRepo;
     private final MovieService movieService;
 
-    public FavoriteService(UserRepository userRepo, MovieService movieService) {
+    public QueuedService(UserRepository userRepo, MovieService movieService) {
         this.userRepo = userRepo;
         this.movieService = movieService;
     }
 
-    public List<Movie> getFavoriteMovies(User user) {
+    public List<Movie> getQueuedMovies(User user) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total favorite movies: {}", theUser.getFavoriteMovies().size());
-            return theUser.getFavoriteMovies();
+            log.info("Total queued movies: {}", theUser.getQueuedMovies().size());
+            return theUser.getQueuedMovies();
         } catch (Exception e) {
-            throw new RuntimeException("Error in getFavoriteMovies: " + e.getMessage(), e);
+            throw new RuntimeException("Error in getQueuedMovies: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public String addFavoriteMovie(User user, MovieAddRequest addedMovie) {
+    public String addQueuedMovie(User user, MovieAddRequest addedMovie) {
         try {
             user = userRepo.findById(user.getUserId()).orElseThrow();
 
@@ -46,23 +46,23 @@ public class FavoriteService {
 
             if (optionalMovie.isPresent()) {
                 movie = optionalMovie.get();
-                if (user.getFavoriteMovies() == null) {
-                    user.setFavoriteMovies(new ArrayList<>());
+                if (user.getQueuedMovies() == null) {
+                    user.setQueuedMovies(new ArrayList<>());
                 }
 
-                boolean isFavorite = user.getFavoriteMovies().stream()
-                        .anyMatch(favoriteMovie -> favoriteMovie.getImdbId().equals(movie.getImdbId()));
+                boolean isQueued = user.getQueuedMovies().stream()
+                        .anyMatch(queuedMovie -> queuedMovie.getImdbId().equals(movie.getImdbId()));
 
-                if (isFavorite) {
+                if (isQueued) {
                     return "Movie already in favorites.";
                 }
 
-                if (movie.getUsersWhoFavorited() == null) {
-                    movie.setUsersWhoFavorited(new ArrayList<>());
+                if (movie.getUsersWhoQueued() == null) {
+                    movie.setUsersWhoQueued(new ArrayList<>());
                 }
 
-                movie.getUsersWhoFavorited().add(user);
-                user.getFavoriteMovies().add(movie);
+                movie.getUsersWhoQueued().add(user);
+                user.getQueuedMovies().add(movie);
             } else {
                 movie = new Movie();
                 movie.setImdbId(addedMovie.getImdbId());
@@ -70,25 +70,25 @@ public class FavoriteService {
                 movie.setPosterUrl(addedMovie.getPosterUrl());
                 movie.setYear(addedMovie.getYear());
                 movie.setType(addedMovie.getType());
-                movie.setUsersWhoFavorited(new ArrayList<>());
-                movie.getUsersWhoFavorited().add(user);
+                movie.setUsersWhoQueued(new ArrayList<>());
+                movie.getUsersWhoQueued().add(user);
 
-                if (user.getFavoriteMovies() == null) {
-                    user.setFavoriteMovies(new ArrayList<>());
+                if (user.getQueuedMovies() == null) {
+                    user.setQueuedMovies(new ArrayList<>());
                 }
-                user.getFavoriteMovies().add(movie);
+                user.getQueuedMovies().add(movie);
             }
 
             movieService.save(movie);
             userRepo.save(user);
-            return "Movie added to favorites.";
+            return "Movie added to queued list.";
         } catch (Exception e) {
-            throw new RuntimeException("Error in addFavoriteMovie: " + e.getMessage(), e);
+            throw new RuntimeException("Error in getQueuedMovie: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public String removeFavoriteMovie(User user, String imdbId) {
+    public String removeQueuedMovie(User user, String imdbId) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
 
@@ -96,20 +96,21 @@ public class FavoriteService {
 
             if (optionalMovie.isPresent()) {
                 Movie movie = optionalMovie.get();
+                log.debug("Found movie: {}", movie.getTitle());
 
-                theUser.getFavoriteMovies().removeIf(m -> m.getImdbId().equals(imdbId));
+                theUser.getQueuedMovies().removeIf(m -> m.getImdbId().equals(imdbId));
 
-                movie.getUsersWhoFavorited().removeIf(u -> u.getUserId().equals(theUser.getUserId()));
+                movie.getUsersWhoQueued().removeIf(u -> u.getUserId().equals(theUser.getUserId()));
 
                 userRepo.save(user);
                 movieService.save(movie);
 
-                return "Movie removed from favorites.";
+                return "Movie removed from queued list.";
             } else {
-                return "Movie not found in favorites.";
+                return "Movie not found in queued list.";
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error in removeFavoriteMovie: " + e.getMessage(), e);
+            throw new RuntimeException("Error in removeQueuedMovie: " + e.getMessage(), e);
         }
 
     }

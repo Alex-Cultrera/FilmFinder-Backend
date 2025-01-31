@@ -56,20 +56,24 @@ public class User implements UserDetails {
         @JoinTable(name = "user_favorite_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
         private List<Movie> favoriteMovies = new ArrayList<>();
 
-        @JsonIgnore
-        @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        @JoinTable(name = "user_reviewed_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
-        private List<Movie> reviewedMovies = new ArrayList<>();
-
+        @Getter
+        @Setter
         @JsonIgnore
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
         @JoinTable(name = "user_watched_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
         private List<Movie> watchedMovies = new ArrayList<>();
 
+        @Getter
+        @Setter
         @JsonIgnore
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
         @JoinTable(name = "user_queued_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
         private List<Movie> queuedMovies = new ArrayList<>();
+
+        @JsonIgnore
+        @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+        @JoinTable(name = "user_reviewed_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+        private List<Movie> reviewedMovies = new ArrayList<>();
 
         @Getter
         @Setter

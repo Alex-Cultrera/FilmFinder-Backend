@@ -13,51 +13,51 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codercultrera.FilmFinder_Backend.domain.Movie;
 import com.codercultrera.FilmFinder_Backend.domain.User;
-import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieAddRequest;
+import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieResponseDTO;
-import com.codercultrera.FilmFinder_Backend.service.FavoriteService;
+import com.codercultrera.FilmFinder_Backend.service.WatchedService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("")
-public class FavoriteController {
+public class WatchedController {
 
-    private final FavoriteService favoriteService;
+    private final WatchedService watchedService;
 
-    public FavoriteController(FavoriteService favoriteService) {
-        this.favoriteService = favoriteService;
+    public WatchedController(WatchedService watchedService) {
+        this.watchedService = watchedService;
     }
 
     // READ
-    @GetMapping("/favorites")
-    public ResponseEntity<?> getFavoriteMovies(@AuthenticationPrincipal User user) {
+    @GetMapping("/watched")
+    public ResponseEntity<?> getWatchedMovies(@AuthenticationPrincipal User user) {
         if (user == null) {
             // Return empty list with 200 status for unauthenticated users
             return ResponseEntity.ok(Collections.emptyList());
         }
-        List<Movie> favorites = favoriteService.getFavoriteMovies(user);
-        List<MovieResponseDTO> favoriteDTOs = favorites.stream()
+        List<Movie> watched = watchedService.getWatchedMovies(user);
+        List<MovieResponseDTO> watchedDTOs = watched.stream()
                 .map(MovieResponseDTO::new)
                 .toList();
-        return ResponseEntity.ok(favoriteDTOs);
+        return ResponseEntity.ok(watchedDTOs);
     }
 
     // CREATE / UPDATE
-    @PostMapping("/addFavorite")
-    public ResponseEntity<String> addFavoriteMovie(@AuthenticationPrincipal User user,
+    @PostMapping("/addWatched")
+    public ResponseEntity<String> addWatchedMovie(@AuthenticationPrincipal User user,
             @RequestBody MovieAddRequest addedMovie) {
-        String response = favoriteService.addFavoriteMovie(user, addedMovie);
+        String response = watchedService.addWatchedMovie(user, addedMovie);
         return ResponseEntity.ok(response);
     }
 
     // DELETE
-    @PostMapping("/removeFavorite")
-    public ResponseEntity<String> removeFavoriteMovie(@AuthenticationPrincipal User user,
+    @PostMapping("/removeWatched")
+    public ResponseEntity<String> removeWatchedMovie(@AuthenticationPrincipal User user,
             @RequestBody MovieRemoveRequest movieToRemove) {
-        String response = favoriteService.removeFavoriteMovie(user, movieToRemove.getImdbId());
+        String response = watchedService.removeWatchedMovie(user, movieToRemove.getImdbId());
         return ResponseEntity.ok(response);
     }
 
