@@ -39,11 +39,6 @@ public class Movie {
         @ManyToMany(mappedBy = "queuedMovies")
         private List<User> usersWhoQueued = new ArrayList<>();
 
-        private String rated;
-        private String runtime;
-        private String plot;
-        private String releaseDate;
-
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
         @JoinTable(name = "movie_actors", joinColumns = @JoinColumn(name = "imdb_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
         private List<Actor> actors;

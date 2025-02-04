@@ -57,10 +57,6 @@ public class ReviewService {
                 movie.setPosterUrl(reviewDTO.getPosterUrl());
                 movie.setYear(reviewDTO.getYear());
                 movie.setType(reviewDTO.getType());
-                movie.setRated(reviewDTO.getRated());
-                movie.setRuntime(reviewDTO.getRuntime());
-                movie.setPlot(reviewDTO.getPlot());
-                movie.setReleaseDate(reviewDTO.getReleaseDate());
             }
 
             Review review = new Review();
@@ -103,19 +99,19 @@ public class ReviewService {
     private ReviewDto convertToDTO(Review review) {
         ReviewDto dto = new ReviewDto();
         dto.setReviewId(review.getReviewId());
+        dto.setCreatedAt(review.getCreatedAt());
+        dto.setUpdatedAt(review.getUpdatedAt());
         dto.setReviewSubject(review.getReviewSubject());
         dto.setContent(review.getContent());
         dto.setRating(review.getRating());
         dto.setUserId(review.getReviewer().getUserId());
-        dto.setMovieId(review.getMovie().getImdbId());
         dto.setFirstName(review.getReviewer().getFirstName());
         dto.setProfilePhotoUrl(review.getReviewer().getPhoto());
-        dto.setCreatedAt(review.getCreatedAt());
-        dto.setUpdatedAt(review.getUpdatedAt());
-        dto.setRated(review.getMovie().getRated());
-        dto.setRuntime(review.getMovie().getRuntime());
-        dto.setPlot(review.getMovie().getPlot());
-        dto.setReleaseDate(review.getMovie().getReleaseDate());
+        dto.setMovieId(review.getMovie().getImdbId());
+        dto.setTitle(review.getMovie().getTitle());
+        dto.setYear(review.getMovie().getYear());
+        dto.setType(review.getMovie().getType());
+        dto.setPosterUrl(review.getMovie().getPosterUrl());
         return dto;
     }
 }

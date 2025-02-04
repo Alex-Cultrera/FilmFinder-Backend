@@ -36,11 +36,8 @@ public class User implements UserDetails {
         private String username;
         @Getter
         @Setter
+        @Column(name = "photo")
         private String photo;
-        @Getter
-        @Setter
-        @Lob
-        private byte[] profilePhoto;
         @Setter
         private String password;
         @Getter

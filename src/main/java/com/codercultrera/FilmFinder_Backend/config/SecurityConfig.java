@@ -84,7 +84,7 @@ public class SecurityConfig {
 
                                                         .requestMatchers(
                                                                         HttpMethod.GET,
-                                                                        "/api/auth/uploadProfilePhoto")
+                                                                        "/user/uploadProfilePhoto")
                                                         .hasAnyRole("USER")
 
                                                         .requestMatchers(
@@ -96,7 +96,7 @@ public class SecurityConfig {
                                                                         "/removeWatched",
                                                                         "/removeFavorite",
                                                                         "/movies/{movieId}/review",
-                                                                        "/api/auth/uploadProfilePhoto")
+                                                                        "/user/uploadProfilePhoto")
                                                         .hasAnyRole("USER")
 
                                                         .requestMatchers(

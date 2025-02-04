@@ -94,28 +94,4 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/profilePhoto/{userId}")
-    public ResponseEntity<byte[]> getProfilePhoto(@PathVariable Long userId) {
-        byte[] profilePhoto = userService.getProfilePhoto(userId);
-        if (profilePhoto != null) {
-            return ResponseEntity.ok().body(profilePhoto);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
-
-    @PostMapping("/hello")
-    public ResponseEntity<?> getHello(@RequestBody HelloRequest helloRequest) {
-        try {
-            boolean foundUser = userService.existsByEmail(helloRequest.getEmail());
-            if (foundUser) {
-                return ResponseEntity.status(HttpStatus.OK).body("Hello");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading file.");
-        }
-    }
 }

@@ -10,21 +10,17 @@ import lombok.Setter;
 public class ReviewDto {
 
     private Long reviewId;
-    private Long userId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String reviewSubject;
     private String content;
     private Integer rating;
-    private String movieId;
-    private String title;
-    private String posterUrl;
-    private String year;
-    private String type;
+    private Long userId;
     private String firstName;
     private String profilePhotoUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String rated;
-    private String runtime;
-    private String plot;
-    private String releaseDate;
+    private String movieId;
+    private String title;
+    private String year;
+    private String type;
+    private String posterUrl;
 }

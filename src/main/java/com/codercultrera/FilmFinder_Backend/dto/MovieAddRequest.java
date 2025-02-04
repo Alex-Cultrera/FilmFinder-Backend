@@ -9,7 +9,7 @@ public class MovieAddRequest {
 
     String imdbId;
     String title;
-    String posterUrl;
     String year;
     String type;
+    String posterUrl;
 }
