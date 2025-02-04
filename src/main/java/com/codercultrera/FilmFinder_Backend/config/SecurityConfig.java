@@ -70,7 +70,8 @@ public class SecurityConfig {
                                                                         "/queued",
                                                                         "/watched",
                                                                         "/favorites",
-                                                                        "/api/auth/google")
+                                                                        "/api/auth/google",
+                                                                        "/movies/{movieId}/reviews")
                                                         .permitAll()
 
                                                         .requestMatchers(
@@ -94,6 +95,7 @@ public class SecurityConfig {
                                                                         "/removeQueued",
                                                                         "/removeWatched",
                                                                         "/removeFavorite",
+                                                                        "/movies/{movieId}/review",
                                                                         "/api/auth/uploadProfilePhoto")
                                                         .hasAnyRole("USER")
 

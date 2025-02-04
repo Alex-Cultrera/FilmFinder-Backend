@@ -37,13 +37,13 @@ public class UserService {
         return userRepo.findByEmail(email);
     }
 
-    public Optional<User> findById(String userId) {
+    public Optional<User> findById(Long userId) {
         return userRepo.findById(Long.valueOf(userId));
     }
 
     public boolean updateProfilePhoto(String userId, MultipartFile file) {
         try {
-            Optional<User> userOptional = findById(userId);
+            Optional<User> userOptional = findById(Long.valueOf(userId));
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 byte[] profilePhoto = file.getBytes();
