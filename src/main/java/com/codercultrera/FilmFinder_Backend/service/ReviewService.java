@@ -76,25 +76,21 @@ public class ReviewService {
 
     }
 
-    // public ReviewDto updateReview(Long reviewId, ReviewDto reviewDTO, Long
-    // userId) {
-    // Review review = reviewRepository.findByIdAndUserId(reviewId, userId)
-    // .orElseThrow(() -> new ResourceNotFoundException("Review not found or
-    // unauthorized"));
+    public ReviewDto updateReview(User user, Long reviewId, ReviewDto reviewDTO) {
+        Review review = reviewRepository.findByReviewIdAndReviewer_UserId(reviewId, user.getUserId()).orElseThrow();
 
-    // review.setContent(reviewDTO.getContent());
-    // review.setRating(reviewDTO.getRating());
-    // review.setUpdatedAt(LocalDateTime.now());
+        review.setReviewSubject(reviewDTO.getReviewSubject());
+        review.setContent(reviewDTO.getContent());
+        review.setRating(reviewDTO.getRating());
+        review.setUpdatedAt(LocalDateTime.now());
 
-    // return convertToDTO(reviewRepository.save(review));
-    // }
+        return convertToDTO(reviewRepository.save(review));
+    }
 
-    // public void deleteReview(Long reviewId, Long userId) {
-    // Review review = reviewRepository.findByIdAndUserId(reviewId, userId)
-    // .orElseThrow(() -> new ResourceNotFoundException("Review not found or
-    // unauthorized"));
-    // reviewRepository.delete(review);
-    // }
+    public void deleteReview(Long reviewId, User user) {
+        Review review = reviewRepository.findByReviewIdAndReviewer_UserId(reviewId, user.getUserId()).orElseThrow();
+        reviewRepository.delete(review);
+    }
 
     private ReviewDto convertToDTO(Review review) {
         ReviewDto dto = new ReviewDto();
