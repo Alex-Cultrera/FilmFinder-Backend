@@ -13,7 +13,6 @@ import com.codercultrera.FilmFinder_Backend.domain.Review;
 import com.codercultrera.FilmFinder_Backend.domain.User;
 import com.codercultrera.FilmFinder_Backend.dto.ReviewDto;
 import com.codercultrera.FilmFinder_Backend.repository.ReviewRepository;
-import com.codercultrera.FilmFinder_Backend.service.UserService;
 
 @Service
 @Transactional
@@ -28,6 +27,20 @@ public class ReviewService {
         this.reviewRepository = reviewRepository;
         this.userService = userService;
         this.movieService = movieService;
+    }
+
+    public List<ReviewDto> getReviews() {
+        return reviewRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ReviewDto> getUserReviews(User user) {
+        return reviewRepository.findByReviewer_UserId(user.getUserId())
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<ReviewDto> getMovieReviews(String movieId) {
