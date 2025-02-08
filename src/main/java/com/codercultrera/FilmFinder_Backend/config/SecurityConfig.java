@@ -103,7 +103,8 @@ public class SecurityConfig {
 
                                                         .requestMatchers(
                                                                         HttpMethod.PUT,
-                                                                        "/review/{reviewId}/update")
+                                                                        "/review/{reviewId}/update",
+                                                                        "/user/password/update")
                                                         .hasAnyRole("USER", "ADMIN")
 
                                                         .requestMatchers(
@@ -114,12 +115,6 @@ public class SecurityConfig {
                                                         .anyRequest().authenticated();
                                 })
                                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-                // .logout()
-                // .logoutUrl("/logout")
-                // .logoutSuccessUrl("/home")
-                // .invalidateHttpSession(true)
-                // .clearAuthentication(true)
-                // .deleteCookies("JSESSIONID")
 
                 return http.build();
         }

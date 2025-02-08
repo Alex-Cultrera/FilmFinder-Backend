@@ -1,9 +1,8 @@
 package com.codercultrera.FilmFinder_Backend.service;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.codercultrera.FilmFinder_Backend.domain.User;
@@ -50,6 +49,12 @@ public class UserService {
         userRepo.save(user);
 
         return photoUrl;
+    }
+
+    public void updatePassword(User user, String newPassword) {
+        String newEncryptedPassword = new BCryptPasswordEncoder(12).encode(newPassword);
+        user.setPassword(newEncryptedPassword);
+        userRepo.save(user);
     }
 
 }

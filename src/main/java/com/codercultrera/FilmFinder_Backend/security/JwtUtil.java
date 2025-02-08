@@ -30,7 +30,7 @@ public class JwtUtil {
 
     private final SecretKey secretKeyForSigning;
 
-    public JwtUtil(@Value("${jwt.secret}")String secretKey, UserService userService) {
+    public JwtUtil(@Value("${jwt.secret}") String secretKey, UserService userService) {
         if (secretKey.length() < 32) {
             throw new IllegalArgumentException("The secret key should be at least 256 bits (32 bytes) long");
         }
@@ -39,7 +39,6 @@ public class JwtUtil {
     }
 
     private final long accessTokenValidity = 15L * 60L * 1000L; // 15 minutes
-//    private final long accessTokenValidity = 5000L; // 5 seconds
     private final long refreshTokenValidity = 14L * 24L * 60L * 60L * 1000L; // 2 weeks
 
     public String generateAccessToken(User user) {
@@ -98,9 +97,6 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
-//            final String username = extractUsername(token);
-//            return (username.equals(userDetails.getUsername()));
-
             Jwts.parser()
                     .setSigningKey(secretKeyForSigning)
                     .parseClaimsJws(token);
