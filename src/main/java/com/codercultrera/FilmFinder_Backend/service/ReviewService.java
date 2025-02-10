@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.codercultrera.FilmFinder_Backend.domain.Movie;
 import com.codercultrera.FilmFinder_Backend.domain.Review;
+import com.codercultrera.FilmFinder_Backend.domain.RoleType;
 import com.codercultrera.FilmFinder_Backend.domain.User;
 import com.codercultrera.FilmFinder_Backend.dto.ReviewDto;
 import com.codercultrera.FilmFinder_Backend.repository.ReviewRepository;
@@ -91,7 +92,6 @@ public class ReviewService {
 
     public ReviewDto updateReview(User user, Long reviewId, ReviewDto reviewDTO) {
         Review review = reviewRepository.findByReviewIdAndReviewer_UserId(reviewId, user.getUserId()).orElseThrow();
-
         review.setReviewSubject(reviewDTO.getReviewSubject());
         review.setContent(reviewDTO.getContent());
         review.setRating(reviewDTO.getRating());
@@ -101,7 +101,12 @@ public class ReviewService {
     }
 
     public void deleteReview(Long reviewId, User user) {
-        Review review = reviewRepository.findByReviewIdAndReviewer_UserId(reviewId, user.getUserId()).orElseThrow();
+        Review review;
+        if (user.getRoles().iterator().next().getRoleType() == RoleType.ROLE_ADMIN) {
+            review = reviewRepository.findByReviewId(reviewId).orElseThrow();
+        } else {
+            review = reviewRepository.findByReviewIdAndReviewer_UserId(reviewId, user.getUserId()).orElseThrow();
+        }
         reviewRepository.delete(review);
     }
 

@@ -98,6 +98,7 @@ public class AuthService {
             responseBody.put("userId", user.getUserId());
             responseBody.put("firstName", user.getFirstName());
             responseBody.put("photo", user.getPhoto());
+            responseBody.put("role", user.getRoles().iterator().next().getRoleType());
 
             return ResponseEntity.ok(responseBody);
         } catch (AuthenticationException ex) {
