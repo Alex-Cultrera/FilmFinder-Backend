@@ -67,6 +67,7 @@ public class SecurityConfig {
                                                                         "/api/auth/check-email",
                                                                         "/api/auth/login",
                                                                         "/api/auth/register",
+                                                                        "/recommended",
                                                                         "/queued",
                                                                         "/watched",
                                                                         "/favorites",
@@ -100,6 +101,12 @@ public class SecurityConfig {
                                                                         "/review/movies/{movieId}/new",
                                                                         "/user/uploadProfilePhoto")
                                                         .hasAnyRole("USER", "ADMIN")
+
+                                                        .requestMatchers(
+                                                                        HttpMethod.POST,
+                                                                        "/addRecommended",
+                                                                        "/removeRecommended")
+                                                        .hasAnyRole("ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.PUT,

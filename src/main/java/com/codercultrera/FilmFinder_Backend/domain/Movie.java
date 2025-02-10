@@ -24,20 +24,24 @@ public class Movie {
         private String posterUrl;
 
         @JsonIgnore
-        @ManyToMany(mappedBy = "favoriteMovies")
-        private List<User> usersWhoFavorited = new ArrayList<>();
+        @ManyToMany(mappedBy = "recommendedMovies")
+        private List<User> usersWhoRecommended = new ArrayList<>();
 
         @JsonIgnore
-        @ManyToMany(mappedBy = "reviewedMovies")
-        private List<User> usersWhoReviewed = new ArrayList<>();
+        @ManyToMany(mappedBy = "queuedMovies")
+        private List<User> usersWhoQueued = new ArrayList<>();
 
         @JsonIgnore
         @ManyToMany(mappedBy = "watchedMovies")
         private List<User> usersWhoWatched = new ArrayList<>();
 
         @JsonIgnore
-        @ManyToMany(mappedBy = "queuedMovies")
-        private List<User> usersWhoQueued = new ArrayList<>();
+        @ManyToMany(mappedBy = "favoriteMovies")
+        private List<User> usersWhoFavorited = new ArrayList<>();
+
+        @JsonIgnore
+        @ManyToMany(mappedBy = "reviewedMovies")
+        private List<User> usersWhoReviewed = new ArrayList<>();
 
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
         @JoinTable(name = "movie_actors", joinColumns = @JoinColumn(name = "imdb_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))

@@ -50,8 +50,15 @@ public class User implements UserDetails {
         @Setter
         @JsonIgnore
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        @JoinTable(name = "user_favorite_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
-        private List<Movie> favoriteMovies = new ArrayList<>();
+        @JoinTable(name = "user_recommended_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+        private List<Movie> recommendedMovies = new ArrayList<>();
+
+        @Getter
+        @Setter
+        @JsonIgnore
+        @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+        @JoinTable(name = "user_queued_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+        private List<Movie> queuedMovies = new ArrayList<>();
 
         @Getter
         @Setter
@@ -64,8 +71,8 @@ public class User implements UserDetails {
         @Setter
         @JsonIgnore
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        @JoinTable(name = "user_queued_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
-        private List<Movie> queuedMovies = new ArrayList<>();
+        @JoinTable(name = "user_favorite_movies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "imdb_id"))
+        private List<Movie> favoriteMovies = new ArrayList<>();
 
         @JsonIgnore
         @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
