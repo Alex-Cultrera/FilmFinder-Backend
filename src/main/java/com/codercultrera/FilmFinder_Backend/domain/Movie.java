@@ -43,10 +43,6 @@ public class Movie {
         @ManyToMany(mappedBy = "reviewedMovies")
         private List<User> usersWhoReviewed = new ArrayList<>();
 
-        @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-        @JoinTable(name = "movie_actors", joinColumns = @JoinColumn(name = "imdb_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
-        private List<Actor> actors;
-
         @OneToMany(mappedBy = "movie")
         private List<Review> reviews = new ArrayList<>();
 

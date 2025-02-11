@@ -29,7 +29,6 @@ public class WatchedService {
     public List<Movie> getWatchedMovies(User user) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total watched movies: {}", theUser.getWatchedMovies().size());
             return theUser.getWatchedMovies();
         } catch (Exception e) {
             throw new RuntimeException("Error in getWatchedMovies: " + e.getMessage(), e);

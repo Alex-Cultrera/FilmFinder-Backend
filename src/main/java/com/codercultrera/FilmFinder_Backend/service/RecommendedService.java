@@ -26,11 +26,9 @@ public class RecommendedService {
         this.movieService = movieService;
     }
 
-    public List<Movie> getRecommendedMovies(User user) {
+    public List<Movie> getRecommendedMovies() {
         try {
-            User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total recommended movies: {}", theUser.getRecommendedMovies().size());
-            return theUser.getRecommendedMovies();
+            return movieService.getRecommendedMovies();
         } catch (Exception e) {
             throw new RuntimeException("Error in getRecommendedMovies: " + e.getMessage(), e);
         }

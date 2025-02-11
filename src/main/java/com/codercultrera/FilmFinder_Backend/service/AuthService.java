@@ -114,14 +114,16 @@ public class AuthService {
                 String accessToken = jwtUtil.generateAccessToken(existingUser);
                 String refreshToken = jwtUtil.generateRefreshToken(existingUser);
 
-                Cookie cookie = new Cookie("refresh_token", refreshToken);
-                cookie.setHttpOnly(true);
-                cookie.setSecure(true);
-                cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
-                cookie.setPath("/");
-                response.addCookie(cookie);
+                CookieUtils.setCookie(response, "accessToken", accessToken);
+                CookieUtils.setCookie(response, "refreshToken", refreshToken);
 
-                return ResponseEntity.ok(new AuthResponse(existingUser.getUserId(), existingUser.getFirstName()));
+                Map<String, Object> responseBody = new HashMap<>();
+                responseBody.put("userId", existingUser.getUserId());
+                responseBody.put("firstName", existingUser.getFirstName());
+                responseBody.put("photo", existingUser.getPhoto());
+                responseBody.put("role", existingUser.getRoles().iterator().next().getRoleType());
+
+                return ResponseEntity.ok(responseBody);
             } catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
             }
@@ -134,7 +136,7 @@ public class AuthService {
                 newUser.setEmail(googleApiRequest.getUserEmail());
                 newUser.setPhoto(googleApiRequest.getUserPhoto());
 
-                Role userRole = roleService.findByRoleType(RoleType.valueOf("USER"))
+                Role userRole = roleService.findByRoleType(RoleType.valueOf("ROLE_USER"))
                         .orElseThrow(() -> new RuntimeException("Error: Role not found."));
                 newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
                 userService.save(newUser);
@@ -142,14 +144,16 @@ public class AuthService {
                 String accessToken = jwtUtil.generateAccessToken(newUser);
                 String refreshToken = jwtUtil.generateRefreshToken(newUser);
 
-                Cookie cookie = new Cookie("refresh_token", refreshToken);
-                cookie.setHttpOnly(true);
-                cookie.setSecure(true);
-                cookie.setMaxAge(3600 * 24 * 14); // 2 weeks
-                cookie.setPath("/");
-                response.addCookie(cookie);
+                CookieUtils.setCookie(response, "accessToken", accessToken);
+                CookieUtils.setCookie(response, "refreshToken", refreshToken);
 
-                return ResponseEntity.ok(new AuthResponse(newUser.getUserId(), newUser.getFirstName()));
+                Map<String, Object> responseBody = new HashMap<>();
+                responseBody.put("userId", newUser.getUserId());
+                responseBody.put("firstName", newUser.getFirstName());
+                responseBody.put("photo", newUser.getPhoto());
+                responseBody.put("role", newUser.getRoles().iterator().next().getRoleType());
+
+                return ResponseEntity.ok(responseBody);
             } catch (BadCredentialsException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error while authenticating user");
             }

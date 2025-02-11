@@ -1,6 +1,5 @@
 package com.codercultrera.FilmFinder_Backend.web;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codercultrera.FilmFinder_Backend.domain.Movie;
 import com.codercultrera.FilmFinder_Backend.domain.User;
-import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieAddRequest;
+import com.codercultrera.FilmFinder_Backend.dto.MovieRemoveRequest;
 import com.codercultrera.FilmFinder_Backend.dto.MovieResponseDTO;
 import com.codercultrera.FilmFinder_Backend.service.RecommendedService;
 
@@ -34,11 +33,7 @@ public class RecommendedController {
     // READ
     @GetMapping("/recommended")
     public ResponseEntity<?> getRecommendedMovies(@AuthenticationPrincipal User user) {
-        if (user == null) {
-            // Return empty list with 200 status for unauthenticated users
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-        List<Movie> recommended = recommendedService.getRecommendedMovies(user);
+        List<Movie> recommended = recommendedService.getRecommendedMovies();
         List<MovieResponseDTO> recommendedDTOs = recommended.stream()
                 .map(MovieResponseDTO::new)
                 .toList();

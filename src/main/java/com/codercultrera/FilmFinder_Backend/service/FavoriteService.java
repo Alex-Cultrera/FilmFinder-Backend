@@ -29,7 +29,6 @@ public class FavoriteService {
     public List<Movie> getFavoriteMovies(User user) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total favorite movies: {}", theUser.getFavoriteMovies().size());
             return theUser.getFavoriteMovies();
         } catch (Exception e) {
             throw new RuntimeException("Error in getFavoriteMovies: " + e.getMessage(), e);

@@ -29,7 +29,6 @@ public class QueuedService {
     public List<Movie> getQueuedMovies(User user) {
         try {
             User theUser = userRepo.findById(user.getUserId()).orElseThrow();
-            log.info("Total queued movies: {}", theUser.getQueuedMovies().size());
             return theUser.getQueuedMovies();
         } catch (Exception e) {
             throw new RuntimeException("Error in getQueuedMovies: " + e.getMessage(), e);
