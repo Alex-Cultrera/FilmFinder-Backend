@@ -72,7 +72,8 @@ public class SecurityConfig {
                                                                         "/watched",
                                                                         "/favorites",
                                                                         "/api/auth/google",
-                                                                        "/review/movies/{movieId}/all")
+                                                                        "/review/movies/{movieId}/all",
+                                                                        "/omdb/api/**")
                                                         .permitAll()
 
                                                         .requestMatchers(
@@ -99,6 +100,7 @@ public class SecurityConfig {
                                                                         "/removeWatched",
                                                                         "/removeFavorite",
                                                                         "/review/movies/{movieId}/new",
+                                                                        "/api/photos/upload",
                                                                         "/user/uploadProfilePhoto")
                                                         .hasAnyRole("USER", "ADMIN")
 
@@ -131,8 +133,8 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedOrigins(
-                                List.of("http://localhost:3000", "https://codercultrera-filmfinder.netlify.app",
-                                                "http://localhost:8080"));
+                                List.of("https://dhai05e5cgyo3.cloudfront.net",
+                                                "http://localhost:3000"));
                 configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With",
                                 "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
                 configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
