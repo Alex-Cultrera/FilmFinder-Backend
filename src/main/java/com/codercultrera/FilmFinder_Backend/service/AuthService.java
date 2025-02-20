@@ -91,8 +91,22 @@ public class AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
-            CookieUtils.setCookie(response, "accessToken", accessToken);
-            CookieUtils.setCookie(response, "refreshToken", refreshToken);
+            // CookieUtils.setCookie(response, "accessToken", accessToken);
+            // CookieUtils.setCookie(response, "refreshToken", refreshToken);
+
+            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
+            response.addCookie(accessTokenCookie);
+
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
+            response.addCookie(refreshTokenCookie);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("userId", user.getUserId());
