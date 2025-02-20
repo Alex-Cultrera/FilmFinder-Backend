@@ -8,10 +8,17 @@ public class CookieUtils {
 
     public static void setCookie(HttpServletResponse response, String name, String value) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true); // Use true in production; false in development
         cookie.setSecure(true); // Use true in production
         cookie.setPath("/");
         response.addCookie(cookie);
+
+        // Manually add the SameSite=None attribute to the Set-Cookie header
+        String cookieHeader = "Set-Cookie=" + cookie.getName() + "=" + cookie.getValue() +
+                "; Path=" + cookie.getPath() +
+                "; HttpOnly; Secure; SameSite=None";
+        response.addHeader("Set-Cookie", cookieHeader);
+
     }
 
     public static String getTokenFromCookie(HttpServletRequest request, String name) {

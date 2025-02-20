@@ -138,12 +138,10 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(
                                 List.of("https://codercultrera-filmfinder.netlify.app",
                                                 "http://localhost:3000"));
-                configuration.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization",
-                                "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
-                                "Access-Control-Allow-Credentials", "Access-Control-Allow-Methods"));
+                configuration.setAllowedHeaders(List.of("*"));
                 configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 configuration.setExposedHeaders(List.of("Authorization", "Access-Control-Allow-Origin",
-                                "Access-Control-Allow-Credentials"));
+                                "Access-Control-Allow-Credentials", "Set-Cookie"));
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", configuration);
                 return source;
