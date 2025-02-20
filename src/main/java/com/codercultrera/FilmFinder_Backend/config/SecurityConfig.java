@@ -84,12 +84,12 @@ public class SecurityConfig {
                                                                         HttpMethod.GET,
                                                                         "/user/uploadProfilePhoto",
                                                                         "/review/user/all")
-                                                        .hasAnyRole("USER", "ADMIN")
+                                                        .hasAnyRole("ROLE_USER", "ROLE_ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.GET,
                                                                         "/review/all")
-                                                        .hasAnyRole("ADMIN")
+                                                        .hasAnyRole("ROLE_ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.POST,
@@ -102,24 +102,24 @@ public class SecurityConfig {
                                                                         "/review/movies/{movieId}/new",
                                                                         "/api/photos/upload",
                                                                         "/user/uploadProfilePhoto")
-                                                        .hasAnyRole("USER", "ADMIN")
+                                                        .hasAnyRole("ROLE_USER", "ROLE_ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.POST,
                                                                         "/addRecommended",
                                                                         "/removeRecommended")
-                                                        .hasAnyRole("ADMIN")
+                                                        .hasAnyRole("ROLE_ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.PUT,
                                                                         "/review/{reviewId}/update",
                                                                         "/user/password/update")
-                                                        .hasAnyRole("USER", "ADMIN")
+                                                        .hasAnyRole("ROLE_USER", "ROLE_ADMIN")
 
                                                         .requestMatchers(
                                                                         HttpMethod.DELETE,
                                                                         "/review/{reviewId}/delete")
-                                                        .hasAnyRole("USER", "ADMIN")
+                                                        .hasAnyRole("ROLE_USER", "ROLE_ADMIN")
 
                                                         .anyRequest().authenticated();
                                 })
