@@ -12,13 +12,6 @@ public class CookieUtils {
         cookie.setSecure(true); // Use true in production
         cookie.setPath("/");
         response.addCookie(cookie);
-
-        // Manually add the SameSite=None attribute to the Set-Cookie header
-        String cookieHeader = "Set-Cookie=" + cookie.getName() + "=" + cookie.getValue() +
-                "; Path=" + cookie.getPath() +
-                "; HttpOnly; Secure; SameSite=None";
-        response.addHeader("Set-Cookie", cookieHeader);
-
     }
 
     public static String getTokenFromCookie(HttpServletRequest request, String name) {
