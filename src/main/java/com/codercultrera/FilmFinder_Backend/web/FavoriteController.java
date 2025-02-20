@@ -47,7 +47,6 @@ public class FavoriteController {
     }
 
     // CREATE / UPDATE
-    @CrossOrigin(origins = "https://codercultrera-filmfinder.netlify.app", allowCredentials = "true")
     @PostMapping("/addFavorite")
     public ResponseEntity<String> addFavoriteMovie(@AuthenticationPrincipal User user,
             @RequestBody MovieAddRequest addedMovie) {
