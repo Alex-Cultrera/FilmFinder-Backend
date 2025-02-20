@@ -133,7 +133,7 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedOrigins(
-                                List.of("https://dhai05e5cgyo3.cloudfront.net",
+                                List.of("https://codercultrera-filmfinder.netlify.app",
                                                 "http://localhost:3000"));
                 configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With",
                                 "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
