@@ -12,6 +12,11 @@ public class CookieUtils {
         cookie.setSecure(true); // Use true in production
         cookie.setPath("/");
         response.addCookie(cookie);
+
+        // String cookieHeader = String.format("%s; Path=%s; HttpOnly; Secure;
+        // SameSite=None",
+        // cookie.getValue(), cookie.getPath());
+        // response.setHeader(name, cookieHeader);
     }
 
     public static String getTokenFromCookie(HttpServletRequest request, String name) {
