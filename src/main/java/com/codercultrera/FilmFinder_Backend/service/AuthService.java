@@ -100,9 +100,10 @@ public class AuthService {
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
             response.addCookie(accessTokenCookie);
-            String cookieHeader1 = String.format("%s; %s; Path=%s; HttpOnly; Secure; SameSite=None",
-                    "accessToken", accessToken, accessTokenCookie.getPath());
-            response.setHeader("Set-Cookie", cookieHeader1);
+            // String cookieHeader1 = String.format("%s; %s; Path=%s; HttpOnly; Secure;
+            // SameSite=None",
+            // "accessToken", accessToken, accessTokenCookie.getPath());
+            response.setHeader("Set-Cookie", String.valueOf(accessTokenCookie));
 
             Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
             refreshTokenCookie.setHttpOnly(true);
@@ -110,9 +111,10 @@ public class AuthService {
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
             response.addCookie(refreshTokenCookie);
-            String cookieHeader2 = String.format("%s; %s; Path=%s; HttpOnly; Secure; SameSite=None",
-                    "accessToken", refreshToken, refreshTokenCookie.getPath());
-            response.setHeader("Set-Cookie", cookieHeader2);
+            // String cookieHeader2 = String.format("%s; %s; Path=%s; HttpOnly; Secure;
+            // SameSite=None",
+            // "accessToken", refreshToken, refreshTokenCookie.getPath());
+            response.setHeader("Set-Cookie", String.valueOf(refreshTokenCookie));
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("userId", user.getUserId());
