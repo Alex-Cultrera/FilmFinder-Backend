@@ -15,7 +15,7 @@ public class CookieUtils {
 
         String cookieHeader = String.format("%s; Path=%s; HttpOnly; Secure; SameSite=None",
                 value, cookie.getPath());
-        response.setHeader(name, cookieHeader);
+        response.setHeader("Set-Cookie", cookieHeader);
     }
 
     public static String getTokenFromCookie(HttpServletRequest request, String name) {
