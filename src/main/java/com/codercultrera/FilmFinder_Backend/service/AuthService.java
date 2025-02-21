@@ -103,7 +103,7 @@ public class AuthService {
             // String cookieHeader1 = String.format("%s; %s; Path=%s; HttpOnly; Secure;
             // SameSite=None",
             // "accessToken", accessToken, accessTokenCookie.getPath());
-            response.setHeader("Set-Cookie", String.valueOf(accessTokenCookie));
+            response.setHeader("Set-Cookie", "accessToken=" + String.valueOf(accessToken));
 
             Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
             refreshTokenCookie.setHttpOnly(true);
@@ -114,7 +114,7 @@ public class AuthService {
             // String cookieHeader2 = String.format("%s; %s; Path=%s; HttpOnly; Secure;
             // SameSite=None",
             // "accessToken", refreshToken, refreshTokenCookie.getPath());
-            response.setHeader("Set-Cookie", String.valueOf(refreshTokenCookie));
+            response.setHeader("Set-Cookie", "refreshToken=" + String.valueOf(refreshToken));
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("userId", user.getUserId());
