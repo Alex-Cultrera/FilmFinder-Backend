@@ -69,6 +69,7 @@ public class SecurityConfig {
                                                         .requestMatchers(
                                                                         "/api/auth/check-email",
                                                                         "/api/auth/login",
+                                                                        "/api/auth/logout",
                                                                         "/api/auth/register",
                                                                         "/recommended",
                                                                         "/queued",

@@ -91,25 +91,13 @@ public class AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
-            // Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-            // accessTokenCookie.setHttpOnly(true);
-            // accessTokenCookie.setSecure(true);
-            // accessTokenCookie.setPath("/");
-            // accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
-            // response.addCookie(accessTokenCookie);
-
-            String accessTokenCookieHeader = String.format("accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+            String accessTokenCookieHeader = String.format(
+                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=900",
                     accessToken);
             response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
-            // Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            // refreshTokenCookie.setHttpOnly(true);
-            // refreshTokenCookie.setSecure(true);
-            // refreshTokenCookie.setPath("/");
-            // refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
-            // response.addCookie(refreshTokenCookie);
-
-            String refreshTokenCookieHeader = String.format("refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+            String refreshTokenCookieHeader = String.format(
+                    "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600",
                     refreshToken);
             response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -133,26 +121,13 @@ public class AuthService {
                 String accessToken = jwtUtil.generateAccessToken(existingUser);
                 String refreshToken = jwtUtil.generateRefreshToken(existingUser);
 
-                Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-                accessTokenCookie.setHttpOnly(true);
-                accessTokenCookie.setSecure(true);
-                accessTokenCookie.setPath("/");
-                accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
-                response.addCookie(accessTokenCookie);
-
                 String accessTokenCookieHeader = String.format(
-                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=900",
                         accessToken);
                 response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
-                Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-                refreshTokenCookie.setHttpOnly(true);
-                refreshTokenCookie.setSecure(true);
-                refreshTokenCookie.setPath("/");
-                refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
-                response.addCookie(refreshTokenCookie);
                 String refreshTokenCookieHeader = String.format(
-                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600",
                         refreshToken);
                 response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -183,26 +158,13 @@ public class AuthService {
                 String accessToken = jwtUtil.generateAccessToken(newUser);
                 String refreshToken = jwtUtil.generateRefreshToken(newUser);
 
-                Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-                accessTokenCookie.setHttpOnly(true);
-                accessTokenCookie.setSecure(true);
-                accessTokenCookie.setPath("/");
-                accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
-                response.addCookie(accessTokenCookie);
-
                 String accessTokenCookieHeader = String.format(
-                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=900",
                         accessToken);
                 response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
-                Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-                refreshTokenCookie.setHttpOnly(true);
-                refreshTokenCookie.setSecure(true);
-                refreshTokenCookie.setPath("/");
-                refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
-                response.addCookie(refreshTokenCookie);
                 String refreshTokenCookieHeader = String.format(
-                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600",
                         refreshToken);
                 response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -239,12 +201,10 @@ public class AuthService {
             User user = userService.findByEmail(userEmail);
             String newAccessToken = jwtUtil.generateAccessToken(user);
 
-            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setSecure(true);
-            accessTokenCookie.setMaxAge(3600 * 24 * 14); // 2 weeks
-            accessTokenCookie.setPath("/");
-            response.addCookie(accessTokenCookie);
+            String accessTokenCookieHeader = String.format(
+                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=900",
+                    newAccessToken);
+            response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
             return ResponseEntity.ok(new AuthResponse(user.getUserId(), user.getFirstName()));
         } catch (BadCredentialsException ex) {
