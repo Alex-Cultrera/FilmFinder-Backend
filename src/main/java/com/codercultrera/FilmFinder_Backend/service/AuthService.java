@@ -91,23 +91,24 @@ public class AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
-            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setSecure(true);
-            accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
-            response.addCookie(accessTokenCookie);
+            // Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+            // accessTokenCookie.setHttpOnly(true);
+            // accessTokenCookie.setSecure(true);
+            // accessTokenCookie.setPath("/");
+            // accessTokenCookie.setMaxAge(60 * 60); // 1 hour for example
+            // response.addCookie(accessTokenCookie);
 
             String accessTokenCookieHeader = String.format("accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
                     accessToken);
             response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
-            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setSecure(true);
-            refreshTokenCookie.setPath("/");
-            refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
-            response.addCookie(refreshTokenCookie);
+            // Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            // refreshTokenCookie.setHttpOnly(true);
+            // refreshTokenCookie.setSecure(true);
+            // refreshTokenCookie.setPath("/");
+            // refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days for example
+            // response.addCookie(refreshTokenCookie);
+
             String refreshTokenCookieHeader = String.format("refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
                     refreshToken);
             response.addHeader("Set-Cookie", refreshTokenCookieHeader);
