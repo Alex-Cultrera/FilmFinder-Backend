@@ -84,9 +84,18 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> userLogout(HttpServletRequest request) {
+    public ResponseEntity<String> userLogout(HttpServletRequest request, HttpServletResponse response) {
+        // Clear security context
         request.getSession().invalidate();
         SecurityContextHolder.clearContext();
+
+        // Clear cookies
+        String accessTokenCookieHeader = "accessToken=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0";
+        String refreshTokenCookieHeader = "refreshToken=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0";
+
+        response.addHeader("Set-Cookie", accessTokenCookieHeader);
+        response.addHeader("Set-Cookie", refreshTokenCookieHeader);
+
         return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
     }
 
