@@ -90,8 +90,8 @@ public class AuthController {
         SecurityContextHolder.clearContext();
 
         // Clear cookies
-        String accessTokenCookieHeader = "accessToken=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        String refreshTokenCookieHeader = "refreshToken=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        String accessTokenCookieHeader = "accessToken=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        String refreshTokenCookieHeader = "refreshToken=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
         response.addHeader("Set-Cookie", accessTokenCookieHeader);
         response.addHeader("Set-Cookie", refreshTokenCookieHeader);
