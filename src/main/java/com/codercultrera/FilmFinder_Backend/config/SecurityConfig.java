@@ -137,7 +137,7 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowCredentials(true);
                 configuration.setAllowedOrigins(
-                                List.of("https://codercultrera-filmfinder.netlify.app",
+                                List.of("https://codercultrera-filmfinder.com",
                                                 "http://localhost:3000"));
                 configuration.setAllowedHeaders(List.of("*"));
                 configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "OPTIONS"));
