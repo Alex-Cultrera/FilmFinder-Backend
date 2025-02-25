@@ -92,12 +92,12 @@ public class AuthService {
             String refreshToken = jwtUtil.generateRefreshToken(user);
 
             String accessTokenCookieHeader = String.format(
-                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                     accessToken);
             response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
             String refreshTokenCookieHeader = String.format(
-                    "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                    "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                     refreshToken);
             response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -122,12 +122,12 @@ public class AuthService {
                 String refreshToken = jwtUtil.generateRefreshToken(existingUser);
 
                 String accessTokenCookieHeader = String.format(
-                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                         accessToken);
                 response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
                 String refreshTokenCookieHeader = String.format(
-                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                         refreshToken);
                 response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -159,12 +159,12 @@ public class AuthService {
                 String refreshToken = jwtUtil.generateRefreshToken(newUser);
 
                 String accessTokenCookieHeader = String.format(
-                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                         accessToken);
                 response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
                 String refreshTokenCookieHeader = String.format(
-                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                        "refreshToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                         refreshToken);
                 response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 
@@ -202,7 +202,7 @@ public class AuthService {
             String newAccessToken = jwtUtil.generateAccessToken(user);
 
             String accessTokenCookieHeader = String.format(
-                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None",
+                    "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=.railway.app",
                     newAccessToken);
             response.addHeader("Set-Cookie", accessTokenCookieHeader);
 
