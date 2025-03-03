@@ -57,7 +57,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String email = jwtUtil.extractEmail(refreshToken);
                 User user = (User) userDetailsService.loadUserByUsername(email);
                 String newAccessToken = jwtUtil.generateAccessToken(user);
-                CookieUtils.setCookie(response, "accessToken", newAccessToken);
+                String accessTokenCookieHeader = String.format(
+                        "accessToken=%s; Path=/; HttpOnly; Secure; SameSite=None; Domain=codercultrera-filmfinder.com",
+                        newAccessToken);
+                response.addHeader("Set-Cookie", accessTokenCookieHeader);
                 accessToken = newAccessToken;
             }
 

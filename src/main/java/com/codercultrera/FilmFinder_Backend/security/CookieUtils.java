@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtils {
 
+    // This is the old way of setting cookies. I have since updated this in
+    // AuthService and JwtAuthFilter.
     public static void setCookie(HttpServletResponse response, String name, String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true); // Use true in production; false in development
